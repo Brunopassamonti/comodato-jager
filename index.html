@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Comodato · Jägermeister</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body,#root{height:100%;}
+body{background:#080808;color:#F0EDE6;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:#0a0a0a;}
+::-webkit-scrollbar-thumb{background:#222;border-radius:2px;}
+.app{min-height:100vh;background:#080808;}
+.header{border-bottom:1px solid #1C1C1C;padding:0 32px;display:flex;align-items:stretch;justify-content:space-between;}
+.header-left{display:flex;align-items:center;gap:14px;padding:16px 0;}
+.logo{font-family:'Playfair Display',serif;font-size:20px;font-style:italic;color:#C8952C;letter-spacing:.02em;}
+.header-sep{width:1px;height:20px;background:#1C1C1C;}
+.header-sub{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.2em;color:#4A4A4A;text-transform:uppercase;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.apikey-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#333;background:none;border:1px solid #1C1C1C;padding:5px 10px;border-radius:2px;cursor:pointer;transition:all .2s;}
+.apikey-btn:hover{color:#C8952C;border-color:#C8952C;}
+.apikey-btn.active{color:#6DB87A;border-color:#1B4D2E;}
+.steps{display:flex;padding:0 32px;border-bottom:1px solid #1C1C1C;}
+.step-item{display:flex;align-items:center;gap:8px;padding:13px 16px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#222;border-bottom:2px solid transparent;transition:all .2s;}
+.step-item.active{color:#F0EDE6;border-bottom-color:#C8952C;}
+.step-item.done{color:#4A4A4A;border-bottom-color:#1C1C1C;}
+.step-num{width:18px;height:18px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;}
+.step-item.active .step-num{background:#C8952C;border-color:#C8952C;color:#000;}
+.step-item.done .step-num{background:#1C1C1C;}
+.main{max-width:800px;margin:0 auto;padding:40px 32px;}
+.upload-zone{border:1px dashed #222;border-radius:4px;padding:52px 40px;text-align:center;cursor:pointer;transition:all .25s;}
+.upload-zone:hover,.upload-zone.drag-over{border-color:#C8952C;background:rgba(200,149,44,.04);}
+.uicon{font-size:28px;margin-bottom:14px;display:block;}
+.utitle{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#F0EDE6;margin-bottom:8px;}
+.usub{font-size:12px;color:#4A4A4A;margin-bottom:22px;line-height:1.7;}
+.usub strong{color:#7a7a7a;}
+.or-row{text-align:center;margin:14px 0;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.15em;color:#1C1C1C;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;border:none;cursor:pointer;transition:all .2s;border-radius:2px;white-space:nowrap;}
+.btn-gold{background:#C8952C;color:#000;font-weight:700;}
+.btn-gold:hover{background:#9A6E1A;}
+.btn-gold:disabled{opacity:.35;cursor:not-allowed;}
+.btn-out{background:transparent;color:#F0EDE6;border:1px solid #1C1C1C;}
+.btn-out:hover{border-color:#4A4A4A;background:#111;}
+.btn-ghost{background:transparent;color:#4A4A4A;border:1px solid #1C1C1C;font-size:8px;}
+.btn-ghost:hover{color:#F0EDE6;border-color:#4A4A4A;}
+.spinner-wrap{text-align:center;padding:60px 40px;}
+.spinner{width:28px;height:28px;border:1px solid #222;border-top-color:#C8952C;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 18px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spin-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#4A4A4A;}
+.restart-row{display:flex;align-items:center;gap:10px;margin-bottom:24px;}
+.fbadge{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;background:#0E0E0E;border:1px solid #1C1C1C;border-radius:2px;font-family:'Space Mono',monospace;font-size:9px;color:#4A4A4A;}
+.fdot{width:5px;height:5px;border-radius:50%;background:#C8952C;flex-shrink:0;}
+.sec{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.3em;text-transform:uppercase;color:#C8952C;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #1C1C1C;display:flex;align-items:center;gap:10px;}
+.sec span{color:#222;font-size:7px;letter-spacing:.1em;}
+.fg{display:grid;gap:12px;margin-bottom:28px;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fr3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;}
+.fd{display:flex;flex-direction:column;gap:5px;}
+.fd label{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#4A4A4A;display:flex;align-items:center;gap:6px;}
+.atag{color:#2a6a2a;font-size:7px;}
+.wtag{color:#C8952C;font-size:7px;}
+.fd input{background:#0C0C0C;border:1px solid #1C1C1C;border-radius:2px;padding:9px 11px;color:#F0EDE6;font-family:'Inter',sans-serif;font-size:13px;transition:all .15s;outline:none;}
+.fd input:focus{border-color:#C8952C;}
+.fd input.af{border-color:#1a3a1a;background:#070E07;color:#6DB87A;}
+.fd input::placeholder{color:#1C1C1C;}
+.divider{height:1px;background:#111;margin:24px 0;}
+.actions{display:flex;justify-content:flex-end;gap:10px;padding-top:16px;border-top:1px solid #111;}
+.errbox{background:rgba(200,149,44,.06);border:1px solid rgba(200,149,44,.2);border-radius:3px;padding:12px 16px;font-size:12px;color:#D4A555;margin-bottom:18px;}
+.equip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
+.ecard{border:1px solid #1C1C1C;border-radius:3px;padding:14px;cursor:pointer;transition:all .2s;}
+.ecard:hover{border-color:#4A4A4A;}
+.ecard.sel{border-color:#C8952C;background:rgba(200,149,44,.06);}
+.eicon{font-size:20px;margin-bottom:8px;}
+.ename{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#F0EDE6;margin-bottom:3px;}
+.edesc{font-size:10px;color:#4A4A4A;}
+.sum-card{background:#0E0E0E;border:1px solid #1C1C1C;border-radius:4px;margin-bottom:20px;overflow:hidden;}
+.sum-hdr{padding:12px 18px;border-bottom:1px solid #111;display:flex;align-items:center;justify-content:space-between;background:#0A0A0A;}
+.sum-lbl{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.25em;text-transform:uppercase;color:#C8952C;}
+.sum-body{padding:20px 22px;display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;}
+.sf{display:flex;flex-direction:column;gap:3px;}
+.sk{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:#222;}
+.sv{font-size:12px;color:#888;}
+.sv.hi{color:#F0EDE6;font-weight:500;}
+.act-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.acard{background:#0E0E0E;border:1px solid #1C1C1C;border-radius:4px;padding:22px 20px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;}
+.acard:hover{border-color:#2a2a2a;}
+.aicon{font-size:22px;}
+.atitle{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#F0EDE6;}
+.adesc{font-size:11px;color:#4A4A4A;line-height:1.5;}
+.abtns{display:flex;gap:8px;flex-wrap:wrap;}
+.em-card{background:#0E0E0E;border:1px solid #1C1C1C;border-radius:4px;overflow:hidden;}
+.em-hdr{padding:12px 18px;border-bottom:1px solid #111;display:flex;align-items:center;justify-content:space-between;background:#0A0A0A;}
+.em-lbl{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.25em;text-transform:uppercase;color:#C8952C;}
+.em-body{padding:22px 24px;}
+.em-text{font-size:12.5px;line-height:1.75;color:#888;white-space:pre-wrap;font-family:'Inter',sans-serif;}
+.toast{position:fixed;bottom:20px;right:20px;background:#0F0F0F;border:1px solid #C8952C;padding:10px 16px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;color:#F0EDE6;border-radius:2px;animation:slideIn .25s ease;z-index:999;}
+@keyframes slideIn{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+/* API key modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:100;}
+.modal{background:#0E0E0E;border:1px solid #1C1C1C;border-radius:4px;padding:32px;width:460px;max-width:90vw;}
+.modal-title{font-family:'Playfair Display',serif;font-size:18px;color:#F0EDE6;margin-bottom:8px;}
+.modal-desc{font-size:12px;color:#4A4A4A;line-height:1.6;margin-bottom:20px;}
+.modal-desc a{color:#C8952C;text-decoration:none;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+@media(max-width:600px){
+  .main{padding:24px 16px;}
+  .fr,.fr3,.act-row{grid-template-columns:1fr;}
+  .sum-body{grid-template-columns:1fr;}
+  .equip-grid{grid-template-columns:1fr;}
+  .header{padding:0 16px;}
+  .steps{padding:0 8px;}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useRef,useEffect,useCallback} = React;
+
+const MONTHS=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const EQUIP=[{id:"tap",label:"Tap Machine",icon:"🍺",desc:"Torneira / chopeira"},{id:"shot",label:"Shotpoint",icon:"❄️",desc:"Máquina de shots"},{id:"freezer",label:"Freezer",icon:"📦",desc:"Freezer armazenagem"}];
+const TODAY=new Date().toISOString().split("T")[0];
+const BLANK={razaoSocial:"",cnpj:"",ie:"",endereco:"",complemento:"",cidade:"",estado:"",cep:"",data:TODAY,equipTipo:"shot",equipSerie:"",equipVolt:"220",nomeRep:"",cpfRep:"",emailRep:"",nomeTes:"",cpfTes:"",emailTes:"",nomeBa:""};
+
+const mask=(v,t)=>{const d=v.replace(/\D/g,"");if(t==="cnpj")return d.slice(0,14).replace(/(\d{2})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1/$2").replace(/(\d{4})(\d)/,"$1-$2");if(t==="cpf")return d.slice(0,11).replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d{1,2})/,"$1-$2");return v;};
+const fmtDate=iso=>{if(!iso)return"___";const[y,m,d]=iso.split("-");return`${parseInt(d)}   de   ${MONTHS[parseInt(m)-1]}   de   ${y}`;};
+
+function buildDocx(f){
+  const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const r=(t,b=false)=>`<w:r>${b?"<w:rPr><w:b/></w:rPr>":""}<w:t xml:space="preserve">${esc(t)}</w:t></w:r>`;
+  const p=(runs,{al="",be=0,af=200,ind=0}={})=>{const ppr=[al?`<w:jc w:val="${al}"/>`:"",`<w:spacing w:before="${be}" w:after="${af}" w:line="276" w:lineRule="auto"/>`,ind?`<w:ind w:left="${ind}"/>`:""].filter(Boolean).join("");return`<w:p><w:pPr>${ppr}</w:pPr>${Array.isArray(runs)?runs.join(""):runs}</w:p>`;};
+  const hd=t=>p(r(t,true),{be:240,af:80});
+  const EQ=[{label:"Tap Machine",id:"tap"},{label:"Shotpoint",id:"shot"},{label:"Freezer",id:"freezer"}];
+  const tcB=`<w:tcBorders><w:top w:val="single" w:sz="4" w:color="AAAAAA"/><w:left w:val="single" w:sz="4" w:color="AAAAAA"/><w:bottom w:val="single" w:sz="4" w:color="AAAAAA"/><w:right w:val="single" w:sz="4" w:color="AAAAAA"/></w:tcBorders>`;
+  const tc=(t,b=false)=>`<w:tc><w:tcPr>${tcB}</w:tcPr><w:p><w:pPr><w:spacing w:after="60"/></w:pPr>${r(t,b)}</w:p></w:tc>`;
+  const tblB=`<w:tblBorders><w:top w:val="single" w:sz="4" w:color="AAAAAA"/><w:left w:val="single" w:sz="4" w:color="AAAAAA"/><w:bottom w:val="single" w:sz="4" w:color="AAAAAA"/><w:right w:val="single" w:sz="4" w:color="AAAAAA"/><w:insideH w:val="single" w:sz="4" w:color="AAAAAA"/><w:insideV w:val="single" w:sz="4" w:color="AAAAAA"/></w:tblBorders>`;
+  const tbl=`<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/>${tblB}</w:tblPr><w:tr>${tc('Assinalar "X"',true)}${tc("Bem",true)}${tc("Descrição, Marca/Modelo, Nº série, Tipo",true)}${tc("Voltagem",true)}</w:tr>${EQ.map(eq=>`<w:tr>${tc(f.equipTipo===eq.id?"X":"")}${tc(eq.label)}${tc(f.equipTipo===eq.id?f.equipSerie:"")}${tc(f.equipTipo===eq.id?f.equipVolt+"V":"")}</w:tr>`).join("")}</w:tbl>`;
+  const[y,m,d]=(f.data||TODAY).split("-");
+  const sigL=`<w:p><w:pPr><w:spacing w:before="480" w:after="60"/></w:pPr>${r("________________________________________________")}</w:p>`;
+  const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>
+${p(r("CONTRATO DE COMODATO",true),{al:"center",af:280})}
+${p([r("COMODANTE: ",true),r("INTERFOOD IMPORTACAO LTDA., estabelecida na Rua Cacique Tibirica, nº 320, Bairro Pauliceia, Sao Bernardo do Campo - SP, CEP 09651-050, inscrita no CNPJ sob nº 36.357.994/0001-45 e Inscricao Estadual nº 635.916.888.110, devidamente representada pelo Sr. Gabriel Seme Cury Neto, portador do RG.: 7.573.681-0 SSP/SP e CPF: 011.768.678-65.")],{af:160})}
+${p([r("COMODATÁRIA: ",true),r("qualificada na assinatura deste Contrato (última página)")],{af:160})}
+${p(r("As partes acima nomeadas e qualificadas, doravante denominadas simplesmente COMODANTE e COMODATARIA, por seus representantes legais, tem justo e combinado o presente instrumento particular de CONTRATO DE COMODATO, mediante clausulas e condicoes abaixo."),{af:200})}
+${hd("1 - PRELIMINARES")}
+${p(r("A COMODANTE é importadora de bebidas e é proprietária do bem descrito e indicado na tabela abaixo:"),{af:120})}
+${tbl}
+${p([r("1.1 -\t",true),r("A COMODATARIA é comerciante de bebidas e tem interesse na utilização do bem indicado na tabela acima para fins de exposição e divulgação desses produtos.")],{be:120,af:200})}
+${hd("2 - OBJETO DO COMODATO")}
+${p([r("2.1 -\t",true),r("Pelo presente instrumento e na melhor forma de direito, a COMODANTE empresta a título gratuito, o bem descrito e indicado na cláusula 1 para a COMODATARIA, que a recebe com a finalidade exclusiva de exposição e divulgação de bebidas importadas pela COMODANTE.")],{af:120})}
+${p([r("2.2 -\t",true),r('A COMODATARIA receberá o bem em questão em perfeito estado e condição, acompanhada de nota fiscal, tendo como natureza da operação "REMESSA EM COMODATO" e sem tributação do ICMS em razão da não incidência prevista no art. 7º, inciso IX, do RICMS-SP/2000.')],{af:200})}
+${hd("3 - PRAZO DE VIGÊNCIA")}
+${p([r("3.1 -\t",true),r("O prazo de vigência do presente comodato será de 12 meses após a assinatura, sendo nesse período analisado o desempenho comercial e financeiro da COMODATARIA para permanência do bem em seu estabelecimento. Qualquer das partes poderá solicitar a rescisão do contrato mediante o aviso prévio com 30 dias de antecedência, porém, findo o prazo de 12 meses e não havendo manifestação em contrário, o mesmo passará a vigorar por prazo indeterminado.")],{af:120})}
+${p([r("3.2 -\t",true),r('Ao encerramento do contrato, o bem em questão deverá ser devolvido com nota fiscal tendo por natureza de operação "DEVOLUÇÃO DE EMPRÉSTIMO EM COMODATO", sem tributação do ICMS em razão da "Não-incidência do ICMS, conforme art. 7º, inciso IX, do RICMS/SP/2000.')],{af:200})}
+${hd("4 - OBRIGAÇÕES DA COMODANTE")}
+${p([r("4.1 -\t",true),r("O transporte do bem, de seu estabelecimento até o endereço da COMODATARIA.")],{af:120})}
+${p([r("4.2 -\t",true),r("A retirada do bem do endereço da COMODATARIA, dentro de 72 (setenta e duas) horas do término do contrato, e o seu transporte de retorno até o seu estabelecimento.")],{af:200})}
+${hd("5 - OBRIGAÇÕES DA COMODATÁRIA")}
+${p([r("5.1 -\t",true),r("Conservar em perfeitas condições e no mesmo estado em que está recebendo o bem indicado, correndo por sua conta eventuais consertos e/ou assistência técnica necessária ao seu funcionamento, inclusive reembolso total de seu valor nos casos de destruição, mau uso, extravio, furto ou qualquer outra forma de inutilização.")],{af:120})}
+${p([r("5.2 -\t",true),r("Utilizar o bem indicado exclusivamente para exposição e divulgação da bebida Jaegermeister, não podendo dar a ela outra finalidade.")],{af:120})}
+${p([r("5.3 -\t",true),r("Comunicar a bebida Jaegermeister bem-posicionada no cardápio.")],{af:120})}
+${p([r("5.4 -\t",true),r("Não locar ou dar em comodato a terceiros, bem como contrair qualquer débito que possa onerar o bem em questão.")],{af:120})}
+${p([r("5.5 -\t",true),r("Ao final do contrato, colocar o bem em questão à disposição da COMODANTE em local de fácil acesso, acompanhada da nota fiscal de devolução prevista na cláusula 3.2.")],{af:120})}
+${p([r("5.6 -\t",true),r("Caso o contrato venha a ser rescindido antecipadamente, por infração a quaisquer cláusulas do contrato cometida pela COMODATARIA, será desta a responsabilidade de transportar e entregar o bem indicado no endereço da COMODANTE, dentro de 24 (vinte e quatro) horas.")],{af:200})}
+${hd("6 - RESCISÃO E MULTA")}
+${p([r("6.1 -\t",true),r("A COMODANTE poderá rescindir o presente contrato a qualquer tempo, por infração cometida pela COMODATARIA a quaisquer de suas cláusulas.")],{af:120})}
+${p([r("6.2 -\t",true),r("São, ainda, causas para a rescisão antecipada do contrato:")],{af:80})}
+${p(r("Títulos protestados contra a COMODATARIA;"),{af:60,ind:720})}
+${p(r("Pedido ou decretação de falência da COMODATARIA;"),{af:60,ind:720})}
+${p(r("c)\tConcordata, requerida ou deferida, da COMODATARIA;"),{af:60,ind:720})}
+${p(r("d)\tEncerramento das atividades, dissolução ou extinção da COMODATARIA."),{af:120,ind:720})}
+${p([r("6.3 -\t",true),r("A COMODATARIA, quando der causa à rescisão antecipada do contrato, estará sujeita a multa de R$ 50,00 (Cinquenta Reais) por dia de atraso na devolução do bem, a contar do prazo previsto na cláusula 5.7.")],{af:200})}
+${hd("7. DO USO DAS INFORMAÇÕES DA COMODANTE COLETADAS PELA COMODATÁRIA")}
+${p([r("7.1 -    ",true),r("Quaisquer dados pessoais de posse da COMODANTE que sejam por ventura acessados pela COMODATARIA, em virtude da prestação dos serviços objeto deste contrato serão considerados como sigilosos e serão tratados como tal pelos colaboradores da COMODATARIA. Tais dados não serão compartilhados com terceiros, para quaisquer fins. Todas as informações coletadas serão utilizadas estritamente para a finalidade da prestação de serviços objeto deste contrato, ficando, desde já, vedado todo e qualquer compartilhamento dos dados da COMODANTE por parte da COMODATARIA por qualquer motivação existente, nos termos da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais). Os dados pessoais coletados pela COMODATARIA serão tratados e armazenados pelo período em que durar esta relação comercial, incluindo até 06 (seis) meses após seu término, em conformidade com a Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais) e com o Marco Civil da internet (Lei nº 12.965/2014).")],{af:200})}
+${hd("8. FORO")}
+${p([r("8.1 -\t",true),r("Fica eleito o foro da Comarca de São Bernardo do Campo/SP, com a exclusão de qualquer outro, por mais privilegiado que seja, para dirimir quaisquer questões oriundas do presente instrumento.")],{af:200})}
+${p(r('E, por estarem justas e contratadas, as partes e as testemunhas envolvidas neste documento, afirmam e declaram que esse poderá ser assinado eletronicamente através da plataforma "CLICKSIGN", com fundamento no Artigo 10, parágrafo 2º da MP 2200-2/2001, e do Artigo 6º do Decreto 10.278/2020, sendo as assinaturas consideradas válidas, vinculantes e executáveis, desde que firmadas pelos representantes legais das partes. Consigna-se no presente instrumento que a assinatura com Certificado Digital/eletrônica tem a mesma validade jurídica de um registro e autenticação feita em cartório. As partes renunciam à possibilidade de exigir a troca, envio ou entrega das vias originais (não-eletrônicas) assinadas do instrumento, bem como renunciam ao direito de recusar ou contestar a validade das assinaturas eletrônicas, na medida máxima permitida pela legislação aplicável.'),{af:400})}
+${p(r(`São Bernardo do Campo,   ${parseInt(d)}   de   ${MONTHS[parseInt(m)-1]}   de   ${y}`),{af:480})}
+${sigL}${p(r("COMODANTE: INTERFOOD IMPORTACAO LTDA.",true),{af:400})}
+${sigL}
+${p([r("COMODATÁRIA: ",true),r(f.razaoSocial)],{af:80})}
+${p([r("CNPJ: ",true),r(f.cnpj)],{af:80})}
+${p([r("I.E. ",true),r(f.ie||"")],{af:80})}
+${p([r("Endereço: ",true),r(f.endereco)],{af:80})}
+${p([r("Complemento: ",true),r(f.complemento||"")],{af:80})}
+${p([r("Cidade/UF: ",true),r(`${f.cidade} - ${f.estado}`)],{af:80})}
+${p([r("CEP: ",true),r(f.cep)],{af:80})}
+${p([r("Representante legal 1: ",true),r(f.nomeRep)],{af:80})}
+${p([r("CPF: ",true),r(f.cpfRep)],{af:80})}
+${p([r("Representante legal 2: ",true),r("")],{af:80})}
+${p([r("CPF: ",true),r("")],{af:200})}
+${p(r("Testemunhas:",true),{af:80})}
+${p(r("1-______________________________\t 2-_______________________________________"),{af:80})}
+<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr></w:body></w:document>`;
+  return{
+    "[Content_Types].xml":`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/></Types>`,
+    "_rels/.rels":`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`,
+    "word/document.xml":doc,
+    "word/_rels/document.xml.rels":`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/></Relationships>`,
+    "word/styles.xml":`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="200" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults></w:styles>`,
+    "word/settings.xml":`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:defaultTabStop w:val="720"/></w:settings>`,
+  };
+}
+
+function App(){
+  const[step,setStep]=useState(1);
+  const[loading,setLoad]=useState(false);
+  const[dlLoad,setDL]=useState(false);
+  const[fn,setFn]=useState("");
+  const[err,setErr]=useState("");
+  const[auto,setAuto]=useState({});
+  const[toast,setToast]=useState("");
+  const[showEm,setShowEm]=useState(false);
+  const[showKey,setShowKey]=useState(false);
+  const[apiKey,setApiKey]=useState(()=>localStorage.getItem("jgr_api_key")||"");
+  const[keyInput,setKeyInput]=useState("");
+  const[f,setF]=useState({...BLANK});
+  const fref=useRef(null);
+
+  const toast_=m=>{setToast(m);setTimeout(()=>setToast(""),2600);};
+  const upd=(k,v)=>setF(p=>({...p,[k]:v}));
+  const reset=()=>{setStep(1);setFn("");setAuto({});setErr("");setShowEm(false);setF({...BLANK});};
+
+  const saveKey=()=>{localStorage.setItem("jgr_api_key",keyInput);setApiKey(keyInput);setShowKey(false);toast_("Chave salva!");};
+
+  const handleFile=async file=>{
+    if(!file)return;
+    if(file.type!=="application/pdf"){setErr("Sobe um PDF.");return;}
+    if(!apiKey){setErr("Configure a chave API (⚙) para leitura automática, ou preencha manualmente.");setStep(2);return;}
+    setErr("");setFn(file.name);setLoad(true);
+    const reader=new FileReader();
+    reader.onload=async e=>{
+      const b64=e.target.result.split(",")[1];
+      try{
+        const res=await fetch("https://api.anthropic.com/v1/messages",{
+          method:"POST",
+          headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+          body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,
+            messages:[{role:"user",content:[
+              {type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},
+              {type:"text",text:`Cartão CNPJ. JSON sem markdown:\n{"razaoSocial":"","cnpj":"XX.XXX.XXX/XXXX-XX","logradouro":"rua e número","bairro":"","cidade":"","estado":"sigla","cep":"XX.XXX-XXX"}`}
+            ]}]})
+        });
+        const data=await res.json();
+        const txt=data.content?.find(b=>b.type==="text")?.text||"";
+        const parsed=JSON.parse(txt.replace(/```json|```/g,"").trim());
+        const filled={},up={};
+        if(parsed.razaoSocial){up.razaoSocial=parsed.razaoSocial;filled.razaoSocial=true;}
+        if(parsed.cnpj){up.cnpj=parsed.cnpj;filled.cnpj=true;}
+        if(parsed.logradouro||parsed.bairro){up.endereco=[parsed.logradouro,parsed.bairro].filter(Boolean).join(", ");filled.endereco=true;}
+        if(parsed.cidade){up.cidade=parsed.cidade;filled.cidade=true;}
+        if(parsed.estado){up.estado=parsed.estado;filled.estado=true;}
+        if(parsed.cep){up.cep=parsed.cep;filled.cep=true;}
+        setF(p=>({...p,...up}));setAuto(filled);setStep(2);
+      }catch{setErr("Erro na leitura. Preenche manualmente.");setStep(2);}
+      finally{setLoad(false);}
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const valid=()=>f.razaoSocial&&f.cnpj&&f.endereco&&f.cidade&&f.estado&&f.cep&&f.equipSerie&&f.data&&f.nomeRep&&f.cpfRep&&f.emailRep&&f.nomeTes&&f.cpfTes&&f.emailTes&&f.nomeBa;
+
+  const genDocx=async()=>{
+    setDL(true);setErr("");
+    try{
+      const zip=new JSZip();
+      Object.entries(buildDocx(f)).forEach(([p,c])=>zip.file(p,c));
+      const blob=await zip.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url;a.download=`Comodato_${f.razaoSocial.replace(/\s+/g,"_")}_${f.equipSerie}.docx`;
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast_("✓ Contrato baixado!");
+    }catch(e){setErr("Erro ao gerar: "+e.message);}
+    finally{setDL(false);}
+  };
+
+  const emailTxt=()=>`Bom dia, segue contrato de comodato.
+
+COMODATÁRIA: ${f.razaoSocial}
+CNPJ: ${f.cnpj}
+I.E.: ${f.ie||""}
+Endereço: Rua: ${f.endereco}
+Complemento: ${f.complemento||""}
+Cidade/UF: ${f.cidade} - ${f.estado}
+CEP: ${f.cep}
+
+REPRESENTANTE LEGAL: ${f.nomeRep}
+CPF: ${f.cpfRep}
+E-mail: ${f.emailRep}
+
+TESTEMUNHA:
+NOME: ${f.nomeTes}
+CPF: ${f.cpfTes}
+E-mail: ${f.emailTes}`;
+
+  const copyEm=()=>{navigator.clipboard.writeText(emailTxt()).then(()=>toast_("E-mail copiado!"));};
+  const EQlbl=EQUIP.find(e=>e.id===f.equipTipo)?.label||"";
+
+  return(
+    <div className="app">
+      {showKey&&(
+        <div className="modal-bg" onClick={()=>setShowKey(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-title">Chave API Anthropic</div>
+            <div className="modal-desc">
+              Necessária para leitura automática do PDF do cartão CNPJ.<br/>
+              Gere em <a href="https://console.anthropic.com/settings/api-keys" target="_blank">console.anthropic.com</a>.<br/>
+              Salva no navegador, nunca enviada a terceiros.
+            </div>
+            <div className="fd">
+              <label>Chave API</label>
+              <input defaultValue={apiKey} onChange={e=>setKeyInput(e.target.value)} placeholder="sk-ant-..." style={{fontFamily:"monospace",fontSize:11}}/>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={()=>setShowKey(false)}>Cancelar</button>
+              <button className="btn btn-gold" onClick={saveKey}>Salvar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="header">
+        <div className="header-left">
+          <span className="logo">Jägermeister</span>
+          <div className="header-sep"/>
+          <span className="header-sub">Gerador de Comodato</span>
+        </div>
+        <div className="header-right">
+          <button className={`apikey-btn${apiKey?" active":""}`} onClick={()=>{setKeyInput(apiKey);setShowKey(true);}}>
+            ⚙ {apiKey?"API ativa":"Config. API"}
+          </button>
+        </div>
+      </div>
+
+      <div className="steps">
+        {[["01","Cartão CNPJ"],["02","Dados"],["03","Gerar"]].map(([n,l],i)=>(
+          <div key={i} className={`step-item${step===i+1?" active":step>i+1?" done":""}`}>
+            <div className="step-num">{step>i+1?"✓":n}</div>{l}
+          </div>
+        ))}
+      </div>
+
+      <div className="main">
+        {step===1&&!loading&&(<>
+          {err&&<div className="errbox">{err}</div>}
+          <div className="upload-zone"
+            onDragOver={e=>{e.preventDefault();e.currentTarget.classList.add("drag-over");}}
+            onDragLeave={e=>e.currentTarget.classList.remove("drag-over")}
+            onDrop={e=>{e.currentTarget.classList.remove("drag-over");handleFile(e.dataTransfer.files[0]);}}
+            onClick={()=>fref.current?.click()}>
+            <span className="uicon">📋</span>
+            <div className="utitle">Cartão CNPJ do cliente</div>
+            <div className="usub">Arrasta o PDF aqui ou clica para selecionar.<br/><strong>Extrai automático: razão social · CNPJ · endereço · cidade · estado · CEP.</strong></div>
+            <button className="btn btn-gold" onClick={e=>{e.stopPropagation();fref.current?.click();}}>Selecionar PDF</button>
+            <input ref={fref} type="file" accept="application/pdf" style={{display:"none"}} onChange={e=>handleFile(e.target.files[0])}/>
+          </div>
+          <div className="or-row">— ou —</div>
+          <div style={{textAlign:"center"}}><button className="btn btn-ghost" onClick={()=>{setStep(2);setErr("");}}>Preencher sem PDF</button></div>
+        </>)}
+        {step===1&&loading&&<div className="spinner-wrap"><div className="spinner"/><div className="spin-lbl">Lendo cartão CNPJ…</div></div>}
+
+        {step===2&&(<>
+          <div className="restart-row">
+            {fn&&<div className="fbadge"><div className="fdot"/>{fn}</div>}
+            <button className="btn btn-ghost" style={{marginLeft:"auto"}} onClick={reset}>Recomeçar</button>
+          </div>
+          {err&&<div className="errbox">{err}</div>}
+          <div className="sec">Comodatária {Object.keys(auto).length>0&&<span>● extraído do PDF</span>}</div>
+          <div className="fg">
+            <div className="fd"><label>Razão Social {auto.razaoSocial&&<span className="atag">auto</span>}</label><input className={auto.razaoSocial?"af":""} value={f.razaoSocial} onChange={e=>upd("razaoSocial",e.target.value)} placeholder="Nome jurídico exato"/></div>
+            <div className="fr">
+              <div className="fd"><label>CNPJ {auto.cnpj&&<span className="atag">auto</span>}</label><input className={auto.cnpj?"af":""} value={f.cnpj} onChange={e=>upd("cnpj",mask(e.target.value,"cnpj"))} placeholder="XX.XXX.XXX/XXXX-XX"/></div>
+              <div className="fd"><label>I.E.</label><input value={f.ie} onChange={e=>upd("ie",e.target.value)} placeholder="14.797.15-7"/></div>
+            </div>
+            <div className="fr">
+              <div className="fd"><label>Endereço {auto.endereco&&<span className="atag">auto</span>}</label><input className={auto.endereco?"af":""} value={f.endereco} onChange={e=>upd("endereco",e.target.value)} placeholder="Rua, número, bairro"/></div>
+              <div className="fd"><label>Complemento</label><input value={f.complemento} onChange={e=>upd("complemento",e.target.value)} placeholder="Sala, andar…"/></div>
+            </div>
+            <div className="fr3">
+              <div className="fd"><label>Cidade {auto.cidade&&<span className="atag">auto</span>}</label><input className={auto.cidade?"af":""} value={f.cidade} onChange={e=>upd("cidade",e.target.value)}/></div>
+              <div className="fd"><label>UF {auto.estado&&<span className="atag">auto</span>}</label><input className={auto.estado?"af":""} value={f.estado} onChange={e=>upd("estado",e.target.value)} placeholder="RJ"/></div>
+              <div className="fd"><label>CEP {auto.cep&&<span className="atag">auto</span>}</label><input className={auto.cep?"af":""} value={f.cep} onChange={e=>upd("cep",e.target.value)} placeholder="XX.XXX-XXX"/></div>
+            </div>
+            <div className="fd" style={{maxWidth:200}}><label>Data</label><input type="date" value={f.data} onChange={e=>upd("data",e.target.value)}/></div>
+          </div>
+          <div className="divider"/>
+          <div className="sec">Equipamento</div>
+          <div className="equip-grid">
+            {EQUIP.map(eq=>(<div key={eq.id} className={`ecard${f.equipTipo===eq.id?" sel":""}`} onClick={()=>upd("equipTipo",eq.id)}><div className="eicon">{eq.icon}</div><div className="ename">{eq.label}</div><div className="edesc">{eq.desc}</div></div>))}
+          </div>
+          <div className="fg">
+            <div className="fr">
+              <div className="fd"><label>Número de Série</label><input value={f.equipSerie} onChange={e=>upd("equipSerie",e.target.value)} placeholder="ex: GTBR1000212"/></div>
+              <div className="fd" style={{maxWidth:130}}><label>Voltagem</label><input value={f.equipVolt} onChange={e=>upd("equipVolt",e.target.value)} placeholder="220"/></div>
+            </div>
+          </div>
+          <div className="divider"/>
+          <div className="sec">Representante Legal <span>assina via Clicksign</span></div>
+          <div className="fg">
+            <div className="fd"><label>Nome Completo</label><input value={f.nomeRep} onChange={e=>upd("nomeRep",e.target.value)} placeholder="Nome completo"/></div>
+            <div className="fr">
+              <div className="fd"><label>CPF</label><input value={f.cpfRep} onChange={e=>upd("cpfRep",mask(e.target.value,"cpf"))} placeholder="XXX.XXX.XXX-XX"/></div>
+              <div className="fd"><label>E-mail <span className="wtag">e-mail ativo</span></label><input type="email" value={f.emailRep} onChange={e=>upd("emailRep",e.target.value)} placeholder="email@ativo.com"/></div>
+            </div>
+          </div>
+          <div className="divider"/>
+          <div className="sec">Testemunha</div>
+          <div className="fg">
+            <div className="fd"><label>Nome Completo</label><input value={f.nomeTes} onChange={e=>upd("nomeTes",e.target.value)} placeholder="Nome completo"/></div>
+            <div className="fr">
+              <div className="fd"><label>CPF</label><input value={f.cpfTes} onChange={e=>upd("cpfTes",mask(e.target.value,"cpf"))} placeholder="XXX.XXX.XXX-XX"/></div>
+              <div className="fd"><label>E-mail <span className="wtag">e-mail ativo</span></label><input type="email" value={f.emailTes} onChange={e=>upd("emailTes",e.target.value)} placeholder="email@ativo.com"/></div>
+            </div>
+          </div>
+          <div className="divider"/>
+          <div className="sec">Brand Ambassador</div>
+          <div className="fg"><div className="fd" style={{maxWidth:320}}><label>Seu Nome</label><input value={f.nomeBa} onChange={e=>upd("nomeBa",e.target.value)} placeholder="Seu nome completo"/></div></div>
+          <div className="actions">
+            <button className="btn btn-ghost" onClick={()=>setStep(1)}>Voltar</button>
+            <button className="btn btn-gold" disabled={!valid()} onClick={()=>setStep(3)}>Revisar →</button>
+          </div>
+        </>)}
+
+        {step===3&&(<>
+          <div className="restart-row">
+            <button className="btn btn-ghost" onClick={()=>setStep(2)}>← Editar</button>
+            <button className="btn btn-ghost" style={{marginLeft:"auto"}} onClick={reset}>Novo comodato</button>
+          </div>
+          {err&&<div className="errbox">{err}</div>}
+          <div className="sum-card">
+            <div className="sum-hdr">
+              <span className="sum-lbl">Confirme os dados</span>
+              <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"#4A4A4A"}}>{EQlbl} · {f.equipSerie} · {f.equipVolt}V</span>
+            </div>
+            <div className="sum-body">
+              {[["Razão Social",f.razaoSocial,true],["CNPJ",f.cnpj,false],["I.E.",f.ie||"—",false],["Endereço",f.endereco,false],["Complemento",f.complemento||"—",false],["Cidade/UF",`${f.cidade} – ${f.estado}`,false],["CEP",f.cep,false],["Data",fmtDate(f.data),false],["Representante Legal",f.nomeRep,true],["CPF Rep.",f.cpfRep,false],["E-mail Rep.",f.emailRep,false],["Testemunha",f.nomeTes,true],["CPF Tes.",f.cpfTes,false],["E-mail Tes.",f.emailTes,false]].map(([k,v,hi])=>(
+                <div className="sf" key={k}><span className="sk">{k}</span><span className={`sv${hi?" hi":""}`}>{v}</span></div>
+              ))}
+            </div>
+          </div>
+          <div className="act-row">
+            <div className="acard">
+              <div className="aicon">📄</div>
+              <div className="atitle">Contrato de Comodato</div>
+              <div className="adesc">Gera o .docx com texto jurídico completo, tabela de equipamento e página de assinatura preenchida.</div>
+              <button className="btn btn-gold" onClick={genDocx} disabled={dlLoad}>{dlLoad?"Gerando…":"⬇ Gerar .docx"}</button>
+            </div>
+            <div className="acard">
+              <div className="aicon">✉️</div>
+              <div className="atitle">Texto do E-mail</div>
+              <div className="adesc">Texto formatado com todos os dados do cliente, pronto para enviar ao responsável pelo processo.</div>
+              <div className="abtns">
+                <button className="btn btn-out" onClick={copyEm}>Copiar e-mail</button>
+                <button className="btn btn-ghost" onClick={()=>setShowEm(v=>!v)}>{showEm?"Ocultar":"Ver"}</button>
+              </div>
+            </div>
+          </div>
+          {showEm&&(
+            <div className="em-card">
+              <div className="em-hdr"><span className="em-lbl">Preview · E-mail</span><button className="btn btn-ghost" onClick={copyEm}>Copiar</button></div>
+              <div className="em-body"><div className="em-text">{emailTxt()}</div></div>
+            </div>
+          )}
+        </>)}
+      </div>
+      {toast&&<div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
