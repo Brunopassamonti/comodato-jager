@@ -6,11 +6,14 @@ Aplicativo interno para registrar, aprovar, contratar e acompanhar equipamentos 
 
 Na primeira etapa, o BA pode enviar cartão CNPJ (`.pdf`), BAM/B.A Management (`.xls` ou `.xlsx`) ou arquivo `.csv`.
 
-- Planilhas e CSV são lidos localmente no navegador e não são enviados para um servidor.
+- Cartões CNPJ gerados pela Receita Federal são lidos diretamente no navegador, sem chave ou configuração.
+- Planilhas e CSV também são lidos localmente no navegador e não são enviados para um servidor.
 - Se houver várias casas, o app abre uma busca para escolher o cliente correto.
 - O app reconhece nome da casa, razão social, CNPJ, endereço, BA, prioridade, Perfect Outlet e dados de equipamento quando essas colunas estiverem disponíveis.
 - Se o owner do arquivo divergir do BA configurado no aparelho, o app mantém o BA atual e mostra um alerta para conferência.
+- O cartão CNPJ preenche automaticamente nome fantasia, razão social, CNPJ, endereço, bairro, município, UF e CEP.
 - Dados jurídicos ausentes no BAM continuam marcados para preenchimento manual e revisão antes do envio.
+- PDFs escaneados, sem camada de texto, usam a leitura alternativa somente quando ela estiver configurada.
 
 ## Fluxo operacional
 
