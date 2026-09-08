@@ -16,9 +16,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
-window.pdfjsReady=import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs")
-  .then(lib=>{lib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";return lib;})
-  .catch(()=>null);
+window.pdfjsReady=new Promise(resolve=>{
+  const script=document.createElement("script");let settled=false;
+  const finish=lib=>{if(settled)return;settled=true;resolve(lib||null);};
+  script.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+  script.async=true;
+  script.onload=()=>{if(window.pdfjsLib)window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";finish(window.pdfjsLib);};
+  script.onerror=()=>finish(null);
+  document.head.appendChild(script);
+  setTimeout(()=>finish(window.pdfjsLib||null),6000);
+});
 </script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -272,10 +279,14 @@ const parseCnpjTokens=tokens=>{
   return{razaoSocial:valueAfterLabel(tokens,"NOME EMPRESARIAL"),nomeFantasia:valueAfterLabel(tokens,"TÍTULO DO ESTABELECIMENTO (NOME DE FANTASIA)"),cnpj,
     logradouro:[logradouro,numero].filter(Boolean).join(", "),bairro,complemento,cidade:valueAfterLabel(tokens,"MUNICÍPIO"),estado:valueAfterLabel(tokens,"UF"),cep:valueAfterLabel(tokens,"CEP"),situacaoCadastral:valueAfterLabel(tokens,"SITUAÇÃO CADASTRAL")};
 };
+const withTimeout=(promise,ms,message)=>{
+  let timer;const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(message)),ms);});
+  return Promise.race([promise,timeout]).finally(()=>clearTimeout(timer));
+};
 const readPdfLocally=async buffer=>{
-  const pdfjs=await window.pdfjsReady;if(!pdfjs)throw new Error("leitor local indisponível");
-  const pdf=await pdfjs.getDocument({data:new Uint8Array(buffer)}).promise,tokens=[];
-  for(let pageNumber=1;pageNumber<=pdf.numPages;pageNumber++){const page=await pdf.getPage(pageNumber),content=await page.getTextContent();content.items.forEach(item=>{const value=String(item.str||"").trim();if(value)tokens.push(value);});}
+  const pdfjs=window.pdfjsLib||await withTimeout(window.pdfjsReady,6500,"o leitor demorou para carregar");if(!pdfjs)throw new Error("leitor local indisponível");
+  const task=pdfjs.getDocument({data:new Uint8Array(buffer)}),pdf=await withTimeout(task.promise,12000,"a leitura do PDF demorou demais"),tokens=[];
+  for(let pageNumber=1;pageNumber<=pdf.numPages;pageNumber++){const page=await withTimeout(pdf.getPage(pageNumber),6000,"não consegui abrir uma página do PDF"),content=await withTimeout(page.getTextContent(),6000,"não consegui ler o texto do PDF");content.items.forEach(item=>{const value=String(item.str||"").trim();if(value)tokens.push(value);});}
   const parsed=parseCnpjTokens(tokens);if(!parsed.cnpj||!parsed.razaoSocial)throw new Error("o PDF não contém texto cadastral reconhecível");return parsed;
 };
 
@@ -417,6 +428,7 @@ function App(){
   const[draftFound,setDraft]=useState(null);
   const[f,setF]=useState(BLANK);
   const fref=useRef(null);
+  const pdfJob=useRef(0);
 
   const errs=fieldErrors(f);
   const ok=Object.keys(errs).length===0;
@@ -486,12 +498,14 @@ function App(){
 
   const handlePdf=async file=>{
     if(file.size>8*1024*1024){setErr("O PDF precisa ter no máximo 8 MB.");return;}
+    const job=++pdfJob.current;
     setErr("");setFn(file.name);setLoadingLabel("Lendo cartão CNPJ…");setLoad(true);
     try{
       const buffer=await file.arrayBuffer();let parsed;
-      try{parsed=await readPdfLocally(buffer);applyParsed(parsed,"Cartão CNPJ · leitura automática",1);return;}
+      try{parsed=await readPdfLocally(buffer);if(job!==pdfJob.current)return;applyParsed(parsed,"Cartão CNPJ · leitura automática",1);return;}
       catch(localError){
-        if(!proxy&&!apiKey)throw new Error("o documento parece escaneado ou não segue o modelo do cartão CNPJ");
+        if(job!==pdfJob.current)return;
+        if(!proxy&&!apiKey)throw localError;
         const b64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>resolve(e.target.result.split(",")[1]);reader.onerror=()=>reject(new Error("falha ao abrir o arquivo"));reader.readAsDataURL(file);});
         if(proxy){
           const res=await fetch(PROXY,{method:"POST",headers:{"Content-Type":"application/json","x-team-pin":teamPin},body:JSON.stringify({pdf:b64})});if(!res.ok)throw new Error("falha na leitura alternativa");parsed=await res.json();
@@ -499,24 +513,26 @@ function App(){
           const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5-20250929",max_tokens:700,messages:[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},{type:"text",text:`Cartão CNPJ. Responda só JSON, sem markdown:\n{"razaoSocial":"","nomeFantasia":"","cnpj":"XX.XXX.XXX/XXXX-XX","logradouro":"rua e número","bairro":"","cidade":"","estado":"sigla","cep":"XXXXX-XXX","ie":""}`}]}]})});
           const data=await res.json();if(data.error)throw new Error(data.error.message||"falha na leitura alternativa");const txt=data.content?.find(b=>b.type==="text")?.text||"";parsed=JSON.parse(txt.replace(/```json|```/g,"").trim());
         }
-        applyParsed(parsed,"Cartão CNPJ · leitura alternativa",1);
+        if(job!==pdfJob.current)return;applyParsed(parsed,"Cartão CNPJ · leitura alternativa",1);
       }
-    }catch(ex){setErr("Não consegui identificar os dados do cartão CNPJ: "+ex.message+". Confira se o PDF foi gerado pela Receita Federal.");setStep(2);}
-    finally{setLoad(false);}
+    }catch(ex){if(job===pdfJob.current){setErr("Não consegui identificar os dados do cartão CNPJ: "+ex.message+". Confira se o PDF foi gerado pela Receita Federal.");setStep(2);}}
+    finally{if(job===pdfJob.current)setLoad(false);}
   };
 
   const handleSheet=async file=>{
     if(file.size>15*1024*1024){setErr("A planilha precisa ter no máximo 15 MB.");return;}
+    const job=++pdfJob.current;
     setErr("");setFn(file.name);setLoadingLabel("Organizando as casas…");setLoad(true);
     try{
       if(!window.XLSX)throw new Error("leitor de planilhas não carregou");
       const buffer=await file.arrayBuffer(),workbook=XLSX.read(buffer,{type:"array",cellDates:true});
       const rows=workbookRows(workbook);
       if(!rows.length)throw new Error("não encontrei colunas de casa, CNPJ ou cliente");
+      if(job!==pdfJob.current)return;
       if(rows.length===1)applyParsed(rows[0],file.name,1);
       else{setImportRows(rows);setImportQuery("");setImportInfo({source:file.name,fields:0,totalRows:rows.length});}
-    }catch(ex){setErr(`Não consegui importar ${file.name}: ${ex.message}. Você pode seguir com o preenchimento manual.`);}
-    finally{setLoad(false);}
+    }catch(ex){if(job===pdfJob.current)setErr(`Não consegui importar ${file.name}: ${ex.message}. Você pode seguir com o preenchimento manual.`);}
+    finally{if(job===pdfJob.current)setLoad(false);}
   };
 
   const handleFile=file=>{
@@ -728,7 +744,7 @@ Solicitado por: ${f.nomeBa}`;
           <div style={{textAlign:"center"}}><button className="btn btn-ghost" onClick={()=>{setStep(2);setErr("");}}>Preencher manualmente</button></div>
         </>)}
 
-        {!showHist&&step===1&&loading&&<div className="spinner-wrap"><div className="spinner"/><div className="spin-lbl">{loadingLabel}</div></div>}
+        {!showHist&&step===1&&loading&&<div className="spinner-wrap"><div className="spinner"/><div className="spin-lbl">{loadingLabel}</div><button className="btn btn-ghost" style={{marginTop:18}} onClick={()=>{pdfJob.current+=1;setLoad(false);setErr("Leitura interrompida. Tente novamente ou preencha os campos manualmente.");}}>Cancelar leitura</button></div>}
 
         {!showHist&&step===2&&(<>
           <div className="restart-row">
