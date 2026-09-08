@@ -6,17 +6,20 @@ O fluxo On-Trade aceita somente **Tap Machine**. Shotpoint e Freezer não aparec
 
 ## Importação inteligente
 
-Na primeira etapa, o BA pode consultar diretamente pelos 14 números do CNPJ ou enviar cartão CNPJ (`.pdf`), BAM/B.A Management (`.xls` ou `.xlsx`) ou arquivo `.csv`.
+Na primeira etapa, o BA pode consultar diretamente pelos 14 números do CNPJ ou selecionar até 8 arquivos de uma vez. São aceitos cartão CNPJ, contrato social/alteração consolidada e RG, CNH ou comprovante de CPF dos representantes em `.pdf`, além de BAM/B.A Management (`.xls` ou `.xlsx`) e `.csv`.
 
 - A consulta pelo número usa os dados cadastrais públicos da BrasilAPI e não envia arquivo algum.
-- Cartões CNPJ gerados pela Receita Federal são lidos diretamente no navegador, sem chave ou configuração.
+- Cartões CNPJ, contratos sociais e documentos dos representantes com camada de texto são lidos diretamente no navegador, sem chave ou configuração.
+- O app combina os arquivos selecionados: o CNPJ preenche a empresa e RG/CNH/CPF preenchem nome e CPF do primeiro e do segundo representante quando disponíveis.
+- E-mails dos representantes continuam manuais, porque normalmente não constam nos documentos.
+- RG, CNH e contrato social não são enviados para leitura externa nem armazenados pelo app.
 - Planilhas e CSV também são lidos localmente no navegador e não são enviados para um servidor.
 - Se houver várias casas, o app abre uma busca para escolher o cliente correto.
 - O app reconhece nome da casa, razão social, CNPJ, endereço, BA, prioridade, Perfect Outlet e dados de equipamento quando essas colunas estiverem disponíveis.
 - Se o owner do arquivo divergir do BA configurado no aparelho, o app mantém o BA atual e mostra um alerta para conferência.
 - O cartão CNPJ preenche automaticamente nome fantasia, razão social, CNPJ, endereço, bairro, município, UF e CEP.
 - Dados jurídicos ausentes no BAM continuam marcados para preenchimento manual e revisão antes do envio.
-- PDFs escaneados, sem camada de texto, usam a leitura alternativa somente quando ela estiver configurada.
+- Fotos e PDFs escaneados, sem camada de texto, exigem conferência e preenchimento manual. A leitura alternativa configurada permanece restrita ao cartão CNPJ.
 
 ## Fluxo operacional
 
@@ -40,7 +43,8 @@ Status disponíveis: `Rascunho`, `Solicitado`, `Em aprovação`, `Aprovado`, `M�
 - base compartilhada opcional pelo Netlify Blobs;
 - PIN do time e PIN separado para aprovação do gestor;
 - histórico local preservado para proteger os dados pessoais do contrato;
-- limite de 8 MB no cartão CNPJ;
+- limite de 8 MB por PDF;
+- envio de até 8 documentos por vez, com combinação automática dos campos da empresa e dos representantes;
 - estrutura de deploy corrigida e ícone PWA incluído.
 - importação automática de BAM, B.A Management, CSV e cartão CNPJ;
 - busca da casa em arquivos com várias linhas e proteção contra troca silenciosa de owner;
