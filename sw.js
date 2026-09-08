@@ -1,4 +1,4 @@
-const V = "jgr-comodato-v4-3";
+const V = "jgr-comodato-v4-4";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", e => {
