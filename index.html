@@ -182,7 +182,10 @@ body{background:var(--cream);color:var(--ink);font-family:'Inter',sans-serif}.ap
 .toast{background:var(--green-950);border-color:var(--orange);color:#fff;border-radius:9px}
 .import-modal{width:650px}.import-search{width:100%;padding:0 13px;margin-bottom:12px;background:#fff;border:1px solid var(--line);border-radius:8px;color:var(--ink)}.import-list{display:grid;gap:8px;max-height:48vh;overflow:auto}.import-row{width:100%;display:grid;grid-template-columns:1fr auto;gap:12px;text-align:left;padding:13px 14px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);cursor:pointer}.import-row:hover{border-color:var(--green-500);background:#f2faf5}.import-row strong,.import-row small{display:block}.import-row small{margin-top:4px;color:var(--muted);line-height:1.4}.import-row-tag{align-self:center;padding:5px 7px;border-radius:5px;background:#e8eee9;color:var(--green-800);font-size:9px;font-weight:800;text-transform:uppercase}.import-count{margin:-6px 0 14px;color:var(--muted);font-size:11px}.import-success{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;margin-bottom:18px;border:1px solid #9ec5ad;border-radius:9px;background:#f2faf5;color:#315e43;font-size:11px;line-height:1.5}.import-success b{display:block;color:var(--green-800)}
 .cnpj-lookup{padding:21px;border:1px solid #9ec5ad;border-radius:14px;background:linear-gradient(120deg,#f2faf5,#fff);box-shadow:0 4px 14px rgba(8,27,18,.04)}.cnpj-lookup-head{display:flex;align-items:flex-start;gap:12px}.cnpj-lookup-icon{width:40px;height:40px;display:grid;place-items:center;flex:0 0 auto;border-radius:10px;background:var(--green-900);color:#fff;font-family:var(--display);font-size:14px;font-weight:800}.cnpj-lookup-title{font-family:var(--display);font-size:24px;font-weight:800;text-transform:uppercase;color:var(--ink)}.cnpj-lookup-copy{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.45}.cnpj-lookup-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;margin-top:16px}.cnpj-lookup-row input{width:100%;min-height:48px;padding:0 14px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-size:16px;outline:none}.cnpj-lookup-row input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(243,108,33,.12)}.cnpj-lookup-row .btn{min-height:48px;border-radius:8px}.cnpj-lookup-status{margin:9px 2px 0;color:var(--green-800);font-size:11px;font-weight:700}
+.document-types{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:12px 0 16px}.document-type{padding:12px 11px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}.document-type b{display:block;color:var(--green-900);font-size:11px;margin-bottom:4px}.document-type span{display:block;color:var(--muted);font-size:10px;line-height:1.4}.privacy-note{margin-top:14px;color:var(--muted);font-size:10px;line-height:1.5}.privacy-note strong{color:var(--green-800)}.doc-report{display:grid;gap:7px;margin:0 0 18px}.doc-report-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);font-size:10px;color:var(--muted)}.doc-report-row b{color:var(--ink);font-size:11px;word-break:break-word}.doc-report-status{flex:0 0 auto;color:var(--success);font-weight:800;text-transform:uppercase;font-size:8px;letter-spacing:.07em}.doc-report-status.warn{color:var(--warn)}
 @media(max-width:600px){.header{min-height:72px;padding:0 14px;position:sticky;top:0;z-index:30}.logo{font-size:21px}.header-right{gap:5px}.hbtn{padding:8px;font-size:7px}.steps{padding:0;overflow-x:hidden}.step-item{flex:1;justify-content:center;padding:13px 5px;font-size:7.5px;letter-spacing:.07em}.main{padding:22px 14px 56px}.upload-zone{padding:38px 17px}.utitle{font-size:25px}.import-modal{padding:22px 16px}.import-row{grid-template-columns:1fr}.import-row-tag{justify-self:start}.process-strip{gap:5px}.cnpj-lookup{padding:17px 14px}.cnpj-lookup-row{grid-template-columns:1fr}.cnpj-lookup-row .btn{justify-content:center}.cnpj-lookup-title{font-size:22px}}
+@media(max-width:760px){.document-types{grid-template-columns:1fr 1fr}}
+@media(max-width:420px){.document-types{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -270,7 +273,7 @@ const workbookRows=workbook=>{
   return[...unique.values()].sort((a,b)=>a.nomeFantasia.localeCompare(b.nomeFantasia,"pt-BR"));
 };
 
-/* ---------- leitura local do cartão CNPJ ---------- */
+/* ---------- leitura local de documentos ---------- */
 const CNPJ_LABELS=["NÚMERO DE INSCRIÇÃO","NOME EMPRESARIAL","TÍTULO DO ESTABELECIMENTO (NOME DE FANTASIA)","LOGRADOURO","NÚMERO","COMPLEMENTO","CEP","BAIRRO/DISTRITO","MUNICÍPIO","UF","ENDEREÇO ELETRÔNICO","TELEFONE","SITUAÇÃO CADASTRAL","DATA DA SITUAÇÃO CADASTRAL","DATA DE ABERTURA","PORTE"];
 const labelEnd=(tokens,label)=>{const target=norm(label),clean=tokens.map(norm);for(let i=0;i<clean.length;i++){for(let size=1;size<=4&&i+size<=clean.length;size++){if(norm(clean.slice(i,i+size).join(" "))===target)return i+size;}}return-1;};
 const valueAfterLabel=(tokens,label)=>{const start=labelEnd(tokens,label);if(start<0)return"";const known=new Set(CNPJ_LABELS.map(norm));for(let i=start;i<Math.min(tokens.length,start+6);i++){const value=String(tokens[i]||"").trim(),n=norm(value);if(!value||known.has(n)||n==="matriz")continue;if(/^\*+$/.test(value))return"";return value;}return"";};
@@ -280,6 +283,34 @@ const parseCnpjTokens=tokens=>{
   return{razaoSocial:valueAfterLabel(tokens,"NOME EMPRESARIAL"),nomeFantasia:valueAfterLabel(tokens,"TÍTULO DO ESTABELECIMENTO (NOME DE FANTASIA)"),cnpj,
     logradouro:[logradouro,numero].filter(Boolean).join(", "),bairro,complemento,cidade:valueAfterLabel(tokens,"MUNICÍPIO"),estado:valueAfterLabel(tokens,"UF"),cep:valueAfterLabel(tokens,"CEP"),situacaoCadastral:valueAfterLabel(tokens,"SITUAÇÃO CADASTRAL")};
 };
+const looksLikePersonName=value=>{
+  const raw=String(value||"").replace(/\s+/g," ").trim(),n=norm(raw),words=n.split(" ").filter(Boolean);
+  if(raw.length<6||raw.length>90||words.length<2||words.length>8||/\d|@|www|http/.test(raw))return false;
+  if(/nome|cpf|rg|registro|identidade|filiacao|nascimento|nacionalidade|naturalidade|assinatura|documento|habilitacao|republica|federativa|brasil|detran|secretaria|logradouro|endereco|socio|administrador|contrato|social|empresarial|limitada|ltda|titular/.test(n))return false;
+  return /^[A-Za-zÀ-ÿ' -]+$/.test(raw);
+};
+const personalNameAfterLabel=tokens=>{
+  const labels=["NOME CIVIL","NOME COMPLETO","NOME E SOBRENOME","NOME DO TITULAR","NOME"];
+  for(const label of labels){const start=labelEnd(tokens,label);if(start<0)continue;for(let i=start;i<Math.min(tokens.length,start+5);i++){if(looksLikePersonName(tokens[i]))return String(tokens[i]).replace(/\s+/g," ").trim();}}
+  return"";
+};
+const nameNearCpf=(tokens,cpf)=>{
+  const idx=tokens.findIndex(x=>onlyD(x).includes(onlyD(cpf)));if(idx<0)return"";
+  for(let distance=1;distance<=8;distance++)for(const pos of [idx-distance,idx+distance]){if(pos>=0&&pos<tokens.length&&looksLikePersonName(tokens[pos]))return String(tokens[pos]).replace(/\s+/g," ").trim();}
+  return"";
+};
+const parseRepresentatives=tokens=>{
+  const all=tokens.join("\n"),flat=tokens.join(" "),matches=all.match(/\b\d{3}[.\s]?\d{3}[.\s]?\d{3}[-\s]?\d{2}\b/g)||[],cpfs=[...new Set(matches.map(x=>mask(x,"cpf")).filter(validCPF))],labelName=personalNameAfterLabel(tokens),contractNames=[];
+  const repPattern=/(?:s[oó]ci[oa]|administrador[a]?|representante legal)\s*[:,;\-]?\s*([A-ZÀ-Ý][A-Za-zÀ-ÿ' ]{5,80}?)(?=,\s*(?:brasileir|portador|inscrit|cpf|rg))/gi;let match;
+  while((match=repPattern.exec(flat))&&contractNames.length<2){const name=String(match[1]||"").replace(/\s+/g," ").trim();if(looksLikePersonName(name))contractNames.push(name);}
+  return cpfs.slice(0,2).map((cpf,i)=>({cpf,nome:(i===0&&labelName)||nameNearCpf(tokens,cpf)||contractNames[i]||""})).filter(x=>x.cpf||x.nome);
+};
+const parseDocumentTokens=tokens=>{
+  const company=parseCnpjTokens(tokens),representatives=parseRepresentatives(tokens),hasCompany=Boolean(company.cnpj||company.razaoSocial||company.nomeFantasia);
+  if(!hasCompany&&!representatives.length)throw new Error("não encontrei CNPJ, CPF ou representante em texto legível");
+  const kind=hasCompany&&representatives.length?"Contrato social":hasCompany?"Cartão CNPJ":representatives.length>1?"Documentos dos representantes":"Documento do representante";
+  return{...company,representatives,_documentKind:kind};
+};
 const withTimeout=(promise,ms,message)=>{
   let timer;const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(message)),ms);});
   return Promise.race([promise,timeout]).finally(()=>clearTimeout(timer));
@@ -288,7 +319,15 @@ const readPdfLocally=async buffer=>{
   const pdfjs=window.pdfjsLib||await withTimeout(window.pdfjsReady,6500,"o leitor demorou para carregar");if(!pdfjs)throw new Error("leitor local indisponível");
   const task=pdfjs.getDocument({data:new Uint8Array(buffer)}),pdf=await withTimeout(task.promise,12000,"a leitura do PDF demorou demais"),tokens=[];
   for(let pageNumber=1;pageNumber<=pdf.numPages;pageNumber++){const page=await withTimeout(pdf.getPage(pageNumber),6000,"não consegui abrir uma página do PDF"),content=await withTimeout(page.getTextContent(),6000,"não consegui ler o texto do PDF");content.items.forEach(item=>{const value=String(item.str||"").trim();if(value)tokens.push(value);});}
-  const parsed=parseCnpjTokens(tokens);if(!parsed.cnpj||!parsed.razaoSocial)throw new Error("o PDF não contém texto cadastral reconhecível");return parsed;
+  return parseDocumentTokens(tokens);
+};
+const mergeParsedDocuments=items=>{
+  const merged={representatives:[]},seenCpf=new Set(),seenName=new Set();
+  items.forEach(item=>{
+    Object.entries(item||{}).forEach(([k,v])=>{if(k!=="representatives"&&k!=="_documentKind"&&v!==undefined&&v!==null&&String(v).trim()!==""&&!merged[k])merged[k]=v;});
+    (item?.representatives||[]).forEach(rep=>{const cpf=onlyD(rep.cpf),name=norm(rep.nome);if((cpf&&seenCpf.has(cpf))||(!cpf&&name&&seenName.has(name)))return;if(cpf)seenCpf.add(cpf);if(name)seenName.add(name);merged.representatives.push(rep);});
+  });
+  return merged;
 };
 
 /* ---------- regras de preenchimento ---------- */
@@ -415,6 +454,7 @@ function App(){
   const[importRows,setImportRows]=useState([]);
   const[importQuery,setImportQuery]=useState("");
   const[importInfo,setImportInfo]=useState(null);
+  const[documentReport,setDocumentReport]=useState([]);
   const[cnpjLookup,setCnpjLookup]=useState("");
   const[lookupLoading,setLookupLoading]=useState(false);
   const[loadingLabel,setLoadingLabel]=useState("Lendo arquivo…");
@@ -432,6 +472,7 @@ function App(){
   const[f,setF]=useState(BLANK);
   const fref=useRef(null);
   const pdfJob=useRef(0);
+  const pendingDocuments=useRef(null);
 
   const errs=fieldErrors(f);
   const ok=Object.keys(errs).length===0;
@@ -461,7 +502,7 @@ function App(){
   const toast_=m=>{setToast(m);setTimeout(()=>setToast(""),2600);};
   const upd=(k,v)=>setF(p=>({...p,[k]:v}));
   const blur=k=>setTouched(p=>({...p,[k]:true}));
-  const reset=()=>{setStep(1);setFn("");setAuto({});setErr("");setShowEm(false);setTouched({});setDraft(null);setImportRows([]);setImportQuery("");setImportInfo(null);setCnpjLookup("");setLookupLoading(false);
+  const reset=()=>{setStep(1);setFn("");setAuto({});setErr("");setShowEm(false);setTouched({});setDraft(null);setImportRows([]);setImportQuery("");setImportInfo(null);setDocumentReport([]);setCnpjLookup("");setLookupLoading(false);pendingDocuments.current=null;
     localStorage.removeItem(K_DRAFT);setF(BLANK());};
 
   const sharedRecord=snap=>({requestId:snap.requestId,status:snap.status,nomeFantasia:snap.nomeFantasia,razaoSocial:snap.razaoSocial,cnpj:snap.cnpj,nomeBa:snap.nomeBa,prioridade:snap.prioridade,pilar:snap.pilar,justificativa:snap.justificativa,volumeEstimado:snap.volumeEstimado,poAtual:snap.poAtual,localInstalacao:snap.localInstalacao,equipTipo:snap.equipTipo,equipModelo:snap.equipModelo,equipSerie:snap.equipSerie,equipPatrimonio:snap.equipPatrimonio,equipVolt:snap.equipVolt,dataInstalacao:snap.dataInstalacao,fotoInstalacao:snap.fotoInstalacao,bamAtualizado:snap.bamAtualizado,observacao:snap.observacao,updatedAt:Date.now()});
@@ -479,7 +520,7 @@ function App(){
     setShowCfg(false);toast_("Configuração salva");
   };
 
-  const applyParsed=(parsed,sourceLabel="arquivo",totalRows=1)=>{
+  const applyParsed=(parsed,sourceLabel="arquivo",totalRows=1,documentCount=1)=>{
     const filled={},up={};let warning="";
     const put=(k,v)=>{if(v!==undefined&&v!==null&&String(v).trim()!==""){up[k]=v;filled[k]=true;}};
     put("nomeFantasia",parsed.nomeFantasia);put("razaoSocial",parsed.razaoSocial);
@@ -489,6 +530,12 @@ function App(){
     put("prioridade",parsed.prioridade);put("poAtual",parsed.poAtual);put("volumeEstimado",parsed.volumeEstimado);put("localInstalacao",parsed.localInstalacao);put("pilar",parsed.pilar);
     if(parsed.equipTipo){put("equipTipo",parsed.equipTipo);put("equipModelo",parsed.equipModelo||MODELS[parsed.equipTipo]?.[0]);}else put("equipModelo",parsed.equipModelo);
     put("equipSerie",parsed.equipSerie);put("equipPatrimonio",parsed.equipPatrimonio);if(["110","220"].includes(parsed.equipVolt))put("equipVolt",parsed.equipVolt);
+    const importedReps=(parsed.representatives||[]).filter(rep=>rep&&(rep.nome||rep.cpf));
+    const occupied=[{nome:f.nomeRep,cpf:f.cpfRep},{nome:f.nomeRep2,cpf:f.cpfRep2}],isSame=rep=>occupied.some(x=>(rep.cpf&&onlyD(x.cpf)===onlyD(rep.cpf))||(rep.nome&&norm(x.nome)===norm(rep.nome)));
+    importedReps.filter(rep=>!isSame(rep)).slice(0,2).forEach(rep=>{
+      const firstOpen=!(f.nomeRep||f.cpfRep||up.nomeRep||up.cpfRep),secondOpen=!(f.nomeRep2||f.cpfRep2||up.nomeRep2||up.cpfRep2),firstAvailable=firstOpen?["nomeRep","cpfRep"]:secondOpen?["nomeRep2","cpfRep2"]:null;
+      if(!firstAvailable)return;put(firstAvailable[0],rep.nome);if(rep.cpf)put(firstAvailable[1],mask(rep.cpf,"cpf"));
+    });
     const importedBA=parsed.nomeBa||matchBA(parsed.nomeBaOriginal),currentBA=f.nomeBa||localStorage.getItem(K_BA)||"";
     if(importedBA&&currentBA&&norm(importedBA)!==norm(currentBA))warning=`O arquivo indica ${importedBA}, mas mantive ${currentBA}. Confirme o owner antes de enviar.`;
     else if(importedBA)put("nomeBa",importedBA);
@@ -496,29 +543,58 @@ function App(){
     if(parsed.situacaoCadastral&&norm(parsed.situacaoCadastral)!=="ativa")warning=[warning,`A situação cadastral informada no documento é ${parsed.situacaoCadastral}.`].filter(Boolean).join(" ");
     const count=Object.keys(filled).length;
     if(!count){setErr("Não encontrei campos compatíveis nesse registro. Você pode seguir com o preenchimento manual.");setImportRows([]);return;}
-    setF(p=>({...p,...up}));setAuto(filled);setImportRows([]);setImportQuery("");setImportInfo({source:sourceLabel,fields:count,totalRows});setErr(warning);setStep(2);
+    setF(p=>({...p,...up}));setAuto(p=>({...p,...filled}));setImportRows([]);setImportQuery("");setImportInfo({source:sourceLabel,fields:count,totalRows,documentCount});setErr(warning);setStep(2);pendingDocuments.current=null;
   };
 
-  const handlePdf=async file=>{
-    if(file.size>8*1024*1024){setErr("O PDF precisa ter no máximo 8 MB.");return;}
-    const job=++pdfJob.current;
-    setErr("");setFn(file.name);setLoadingLabel("Lendo cartão CNPJ…");setLoad(true);
+  const parsePdfFile=async file=>{
+    if(file.size>8*1024*1024)throw new Error("máximo de 8 MB por PDF");
+    const buffer=await file.arrayBuffer();
+    try{return await readPdfLocally(buffer);}
+    catch(localError){
+      // Documentos pessoais nunca são enviados para leitura externa. A alternativa abaixo é exclusiva do cartão CNPJ.
+      if(!/cnpj/i.test(file.name)||(!proxy&&!apiKey))throw localError;
+      const b64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>resolve(e.target.result.split(",")[1]);reader.onerror=()=>reject(new Error("falha ao abrir o arquivo"));reader.readAsDataURL(file);});
+      let parsed;
+      if(proxy){const res=await fetch(PROXY,{method:"POST",headers:{"Content-Type":"application/json","x-team-pin":teamPin},body:JSON.stringify({pdf:b64})});if(!res.ok)throw new Error("falha na leitura alternativa");parsed=await res.json();}
+      else{const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5-20250929",max_tokens:700,messages:[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},{type:"text",text:`Cartão CNPJ. Responda só JSON, sem markdown:\n{"razaoSocial":"","nomeFantasia":"","cnpj":"XX.XXX.XXX/XXXX-XX","logradouro":"rua e número","bairro":"","cidade":"","estado":"sigla","cep":"XXXXX-XXX","ie":""}`}]}]})});const data=await res.json();if(data.error)throw new Error(data.error.message||"falha na leitura alternativa");const txt=data.content?.find(b=>b.type==="text")?.text||"";parsed=JSON.parse(txt.replace(/```json|```/g,"").trim());}
+      return{...parsed,_documentKind:"Cartão CNPJ"};
+    }
+  };
+
+  const parseSheetFile=async file=>{
+    if(file.size>15*1024*1024)throw new Error("máximo de 15 MB por planilha");
+    if(!window.XLSX)throw new Error("leitor de planilhas não carregou");
+    const buffer=await file.arrayBuffer(),workbook=XLSX.read(buffer,{type:"array",cellDates:true}),rows=workbookRows(workbook);
+    if(!rows.length)throw new Error("não encontrei colunas de casa, CNPJ ou cliente");return rows;
+  };
+
+  const handleFiles=async fileList=>{
+    const files=[...fileList].filter(Boolean);
+    if(!files.length)return;if(files.length>8){setErr("Selecione no máximo 8 arquivos por vez.");return;}
+    const invalid=files.find(file=>!(["pdf","xlsx","xls","csv"].includes((file.name.split(".").pop()||"").toLowerCase())||file.type==="application/pdf"));
+    if(invalid){setErr(`Formato não reconhecido em ${invalid.name}. Envie PDF, XLSX, XLS ou CSV.`);return;}
+    const job=++pdfJob.current,parsedDocs=[],choices=[],report=[];
+    setErr("");setFn(files.length>1?`${files.length} documentos`:files[0].name);setLoadingLabel(files.length>1?`Lendo ${files.length} documentos…`:"Lendo documento…");setLoad(true);setDocumentReport([]);
     try{
-      const buffer=await file.arrayBuffer();let parsed;
-      try{parsed=await readPdfLocally(buffer);if(job!==pdfJob.current)return;applyParsed(parsed,"Cartão CNPJ · leitura automática",1);return;}
-      catch(localError){
+      for(const file of files){
         if(job!==pdfJob.current)return;
-        if(!proxy&&!apiKey)throw localError;
-        const b64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>resolve(e.target.result.split(",")[1]);reader.onerror=()=>reject(new Error("falha ao abrir o arquivo"));reader.readAsDataURL(file);});
-        if(proxy){
-          const res=await fetch(PROXY,{method:"POST",headers:{"Content-Type":"application/json","x-team-pin":teamPin},body:JSON.stringify({pdf:b64})});if(!res.ok)throw new Error("falha na leitura alternativa");parsed=await res.json();
-        }else{
-          const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5-20250929",max_tokens:700,messages:[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},{type:"text",text:`Cartão CNPJ. Responda só JSON, sem markdown:\n{"razaoSocial":"","nomeFantasia":"","cnpj":"XX.XXX.XXX/XXXX-XX","logradouro":"rua e número","bairro":"","cidade":"","estado":"sigla","cep":"XXXXX-XXX","ie":""}`}]}]})});
-          const data=await res.json();if(data.error)throw new Error(data.error.message||"falha na leitura alternativa");const txt=data.content?.find(b=>b.type==="text")?.text||"";parsed=JSON.parse(txt.replace(/```json|```/g,"").trim());
-        }
-        if(job!==pdfJob.current)return;applyParsed(parsed,"Cartão CNPJ · leitura alternativa",1);
+        const ext=(file.name.split(".").pop()||"").toLowerCase();
+        try{
+          if(ext==="pdf"||file.type==="application/pdf"){
+            const parsed=await parsePdfFile(file);parsedDocs.push(parsed);report.push({name:file.name,status:"Lido",detail:parsed._documentKind||"PDF"});
+          }else{
+            const rows=await parseSheetFile(file);
+            if(rows.length===1){parsedDocs.push(rows[0]);report.push({name:file.name,status:"Lido",detail:"1 casa"});}
+            else{choices.push(...rows);report.push({name:file.name,status:"Escolher",detail:`${rows.length} casas`});}
+          }
+        }catch(ex){report.push({name:file.name,status:"Revisar",detail:ex.message||"não reconhecido"});}
       }
-    }catch(ex){if(job===pdfJob.current){setErr("Não consegui identificar os dados do cartão CNPJ: "+ex.message+". Confira se o PDF foi gerado pela Receita Federal.");setStep(2);}}
+      if(job!==pdfJob.current)return;setDocumentReport(report);
+      const merged=mergeParsedDocuments(parsedDocs),successful=report.filter(x=>x.status==="Lido").length;
+      if(choices.length){pendingDocuments.current={parsed:merged,source:files.map(x=>x.name).join(" + "),documentCount:successful};setImportRows(choices);setImportQuery("");setImportInfo({source:files.map(x=>x.name).join(" + "),fields:0,totalRows:choices.length,documentCount:successful});return;}
+      if(!successful)throw new Error("nenhum arquivo tinha texto ou colunas reconhecíveis");
+      applyParsed(merged,files.map(x=>x.name).join(" + "),1,successful);
+    }catch(ex){if(job===pdfJob.current)setErr(`Não consegui preencher automaticamente: ${ex.message}. PDFs escaneados ou fotos sem texto precisam ser conferidos e preenchidos manualmente.`);}
     finally{if(job===pdfJob.current)setLoad(false);}
   };
 
@@ -548,30 +624,6 @@ function App(){
       },"Consulta pública pelo CNPJ",1);
     }catch(ex){setErr(`Não consegui consultar este CNPJ: ${ex.message}. Você ainda pode preencher manualmente.`);}
     finally{setLookupLoading(false);}
-  };
-
-  const handleSheet=async file=>{
-    if(file.size>15*1024*1024){setErr("A planilha precisa ter no máximo 15 MB.");return;}
-    const job=++pdfJob.current;
-    setErr("");setFn(file.name);setLoadingLabel("Organizando as casas…");setLoad(true);
-    try{
-      if(!window.XLSX)throw new Error("leitor de planilhas não carregou");
-      const buffer=await file.arrayBuffer(),workbook=XLSX.read(buffer,{type:"array",cellDates:true});
-      const rows=workbookRows(workbook);
-      if(!rows.length)throw new Error("não encontrei colunas de casa, CNPJ ou cliente");
-      if(job!==pdfJob.current)return;
-      if(rows.length===1)applyParsed(rows[0],file.name,1);
-      else{setImportRows(rows);setImportQuery("");setImportInfo({source:file.name,fields:0,totalRows:rows.length});}
-    }catch(ex){if(job===pdfJob.current)setErr(`Não consegui importar ${file.name}: ${ex.message}. Você pode seguir com o preenchimento manual.`);}
-    finally{if(job===pdfJob.current)setLoad(false);}
-  };
-
-  const handleFile=file=>{
-    if(!file)return;
-    const ext=(file.name.split(".").pop()||"").toLowerCase();
-    if(ext==="pdf"||file.type==="application/pdf")return handlePdf(file);
-    if(["xlsx","xls","csv"].includes(ext))return handleSheet(file);
-    setErr("Formato não reconhecido. Envie PDF, XLSX, XLS ou CSV.");
   };
 
   const EQlbl=EQUIP.find(e=>e.id===f.equipTipo)?.label||"";
@@ -652,20 +704,20 @@ Solicitado por: ${f.nomeBa}`;
   return(
     <div className="app">
       {importRows.length>0&&(
-        <div className="modal-bg" onClick={()=>{setImportRows([]);setImportQuery("");}}>
+        <div className="modal-bg" onClick={()=>{setImportRows([]);setImportQuery("");pendingDocuments.current=null;}}>
           <div className="modal import-modal" onClick={e=>e.stopPropagation()}>
             <div className="modal-title">Escolha a casa</div>
             <div className="modal-desc">Encontrei {importRows.length} casas em <strong>{fn}</strong>. Selecione uma para preencher a solicitação sem alterar o owner silenciosamente.</div>
             <input className="import-search" type="search" value={importQuery} onChange={e=>setImportQuery(e.target.value)} placeholder="Buscar casa, CNPJ, cidade ou BA" autoFocus/>
             <div className="import-count">{filteredImportRows.length} resultado{filteredImportRows.length===1?"":"s"}{filteredImportRows.length===100?" — refine a busca para ver mais":""}</div>
             <div className="import-list">
-              {filteredImportRows.map((row,i)=><button type="button" className="import-row" key={`${row._sheet}-${row._row}-${i}`} onClick={()=>applyParsed(row,fn,importRows.length)}>
+              {filteredImportRows.map((row,i)=><button type="button" className="import-row" key={`${row._sheet}-${row._row}-${i}`} onClick={()=>{const pending=pendingDocuments.current;applyParsed(mergeParsedDocuments([pending?.parsed||{},row]),pending?.source||fn,importRows.length,(pending?.documentCount||0)+1);}}>
                 <span><strong>{row.nomeFantasia||row.razaoSocial||row.cnpj}</strong><small>{[row.nomeBaOriginal||row.nomeBa,row.cidade,row.cnpj].filter(Boolean).join(" · ")||"Dados cadastrais disponíveis"}</small></span>
                 <span className="import-row-tag">usar esta casa</span>
               </button>)}
               {!filteredImportRows.length&&<div className="empty">Nenhuma casa encontrada. Tente outro termo.</div>}
             </div>
-            <div className="modal-actions"><button className="btn btn-ghost" onClick={()=>{setImportRows([]);setImportQuery("");}}>Cancelar</button></div>
+            <div className="modal-actions"><button className="btn btn-ghost" onClick={()=>{setImportRows([]);setImportQuery("");pendingDocuments.current=null;}}>Cancelar</button></div>
           </div>
         </div>
       )}
@@ -694,7 +746,7 @@ Solicitado por: ${f.nomeBa}`;
             </div>
             <div className="modal-desc">
               O nome e o e-mail de destino ficam salvos neste aparelho para não precisar redigitar.
-              O cartão CNPJ padrão é lido automaticamente, sem chave. A leitura alternativa é usada apenas para documentos escaneados e fica salva somente neste navegador.
+              O cartão CNPJ padrão é lido automaticamente, sem chave. A leitura alternativa é usada apenas para cartão CNPJ escaneado e fica salva somente neste navegador. Documentos pessoais são sempre processados localmente.
             </div>
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={()=>setShowCfg(false)}>Cancelar</button>
@@ -771,17 +823,24 @@ Solicitado por: ${f.nomeBa}`;
             </div>
             {lookupLoading&&<div className="cnpj-lookup-status">Consultando o cadastro público…</div>}
           </div>
-          <div className="or-row">— ou importe um arquivo —</div>
+          <div className="or-row">— ou envie os documentos —</div>
+          <div className="document-types">
+            <div className="document-type"><b>Cartão CNPJ</b><span>Dados jurídicos e endereço da casa</span></div>
+            <div className="document-type"><b>Contrato social</b><span>Razão social e representantes legais</span></div>
+            <div className="document-type"><b>RG, CNH ou CPF</b><span>Nome e CPF dos representantes</span></div>
+            <div className="document-type"><b>BAM / planilha</b><span>Casa, BA e dados operacionais</span></div>
+          </div>
           <div className="upload-zone"
             onDragOver={e=>{e.preventDefault();e.currentTarget.classList.add("drag-over");}}
             onDragLeave={e=>e.currentTarget.classList.remove("drag-over")}
-            onDrop={e=>{e.preventDefault();e.currentTarget.classList.remove("drag-over");handleFile(e.dataTransfer.files[0]);}}
+            onDrop={e=>{e.preventDefault();e.currentTarget.classList.remove("drag-over");handleFiles(e.dataTransfer.files);}}
             onClick={()=>fref.current?.click()}>
             <span className="uicon">＋</span>
-            <div className="utitle">Importar dados da casa</div>
-            <div className="usub">Envie cartão CNPJ, BAM, B.A Management ou CSV.<br/><strong>O app preenche os dados disponíveis; o BA entra apenas para conferir e completar o que não existe no arquivo.</strong></div>
-            <button className="btn btn-gold" onClick={e=>{e.stopPropagation();fref.current?.click();}}>Selecionar arquivo</button>
-            <input ref={fref} type="file" accept=".pdf,.xlsx,.xls,.csv,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" style={{display:"none"}} onChange={e=>{handleFile(e.target.files[0]);e.target.value="";}}/>
+            <div className="utitle">Importar dados da casa e proprietários</div>
+            <div className="usub">Selecione até 8 PDFs ou planilhas de uma vez.<br/><strong>O app combina os dados encontrados; o BA apenas confere e completa o que faltar.</strong></div>
+            <button className="btn btn-gold" onClick={e=>{e.stopPropagation();fref.current?.click();}}>Selecionar documentos</button>
+            <input ref={fref} type="file" multiple accept=".pdf,.xlsx,.xls,.csv,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" style={{display:"none"}} onChange={e=>{handleFiles(e.target.files);e.target.value="";}}/>
+            <div className="privacy-note"><strong>Privacidade:</strong> RG, CNH, CPF e contrato social são lidos neste aparelho e não ficam armazenados. Use PDF digital com texto legível; foto ou PDF escaneado pode exigir conferência manual.</div>
           </div>
           <div className="or-row">— ou preencha sem consulta —</div>
           <div style={{textAlign:"center"}}><button className="btn btn-ghost" onClick={()=>{setStep(2);setErr("");}}>Preencher manualmente</button></div>
@@ -795,7 +854,8 @@ Solicitado por: ${f.nomeBa}`;
             <button className="btn btn-ghost" style={{marginLeft:"auto"}} onClick={reset}>Recomeçar</button>
           </div>
           {err&&<div className="errbox">{err}</div>}
-          {importInfo&&<div className="import-success"><span>✓</span><span><b>{importInfo.fields} campos preenchidos automaticamente</b>Origem: {importInfo.source}{importInfo.totalRows>1?` · ${importInfo.totalRows} casas encontradas`:""}. Revise os dados jurídicos antes de enviar.</span></div>}
+          {importInfo&&<div className="import-success"><span>✓</span><span><b>{importInfo.fields} campos preenchidos automaticamente</b>{importInfo.documentCount>1?`${importInfo.documentCount} documentos combinados`:<>Origem: {importInfo.source}</>}{importInfo.totalRows>1?` · ${importInfo.totalRows} casas encontradas`:""}. Revise os dados jurídicos e os representantes antes de enviar.</span></div>}
+          {documentReport.length>0&&<div className="doc-report">{documentReport.map((doc,i)=><div className="doc-report-row" key={`${doc.name}-${i}`}><span><b>{doc.name}</b><br/>{doc.detail}</span><span className={`doc-report-status${doc.status==="Revisar"?" warn":""}`}>{doc.status}</span></div>)}</div>}
 
           <div className="request-hero"><div><div className="request-id">{f.requestId}</div><div className="request-help">Este número acompanha aprovação, contrato, instalação e BAM.</div></div><span className="status-pill">{f.status}</span></div>
           <div className="sec">Decisão comercial <span>por que este equipamento deve ir para esta casa</span></div>
@@ -844,7 +904,7 @@ Solicitado por: ${f.nomeBa}`;
           </div>
 
           <div className="divider"/>
-          <div className="sec">Representante Legal <span>assina via Clicksign</span></div>
+          <div className="sec">Representante Legal <span>nome e CPF podem vir dos documentos · e-mail é conferido pelo BA</span></div>
           <div className="fg">
             <F k="nomeRep" label="Nome Completo" ph="Nome completo" wide/>
             <div className="fr">
