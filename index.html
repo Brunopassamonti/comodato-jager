@@ -15,6 +15,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script>
+window.pdfjsReady=import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs")
+  .then(lib=>{lib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";return lib;})
+  .catch(()=>null);
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body,#root{height:100%;}
@@ -257,6 +262,23 @@ const workbookRows=workbook=>{
   return[...unique.values()].sort((a,b)=>a.nomeFantasia.localeCompare(b.nomeFantasia,"pt-BR"));
 };
 
+/* ---------- leitura local do cartão CNPJ ---------- */
+const CNPJ_LABELS=["NÚMERO DE INSCRIÇÃO","NOME EMPRESARIAL","TÍTULO DO ESTABELECIMENTO (NOME DE FANTASIA)","LOGRADOURO","NÚMERO","COMPLEMENTO","CEP","BAIRRO/DISTRITO","MUNICÍPIO","UF","ENDEREÇO ELETRÔNICO","TELEFONE","SITUAÇÃO CADASTRAL","DATA DA SITUAÇÃO CADASTRAL","DATA DE ABERTURA","PORTE"];
+const labelEnd=(tokens,label)=>{const target=norm(label),clean=tokens.map(norm);for(let i=0;i<clean.length;i++){for(let size=1;size<=4&&i+size<=clean.length;size++){if(norm(clean.slice(i,i+size).join(" "))===target)return i+size;}}return-1;};
+const valueAfterLabel=(tokens,label)=>{const start=labelEnd(tokens,label);if(start<0)return"";const known=new Set(CNPJ_LABELS.map(norm));for(let i=start;i<Math.min(tokens.length,start+6);i++){const value=String(tokens[i]||"").trim(),n=norm(value);if(!value||known.has(n)||n==="matriz")continue;if(/^\*+$/.test(value))return"";return value;}return"";};
+const parseCnpjTokens=tokens=>{
+  const all=tokens.join("\n"),cnpj=(all.match(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/)||all.match(/\b\d{14}\b/)||[])[0]||"";
+  const logradouro=valueAfterLabel(tokens,"LOGRADOURO"),numero=valueAfterLabel(tokens,"NÚMERO"),bairro=valueAfterLabel(tokens,"BAIRRO/DISTRITO"),complemento=valueAfterLabel(tokens,"COMPLEMENTO");
+  return{razaoSocial:valueAfterLabel(tokens,"NOME EMPRESARIAL"),nomeFantasia:valueAfterLabel(tokens,"TÍTULO DO ESTABELECIMENTO (NOME DE FANTASIA)"),cnpj,
+    logradouro:[logradouro,numero].filter(Boolean).join(", "),bairro,complemento,cidade:valueAfterLabel(tokens,"MUNICÍPIO"),estado:valueAfterLabel(tokens,"UF"),cep:valueAfterLabel(tokens,"CEP"),situacaoCadastral:valueAfterLabel(tokens,"SITUAÇÃO CADASTRAL")};
+};
+const readPdfLocally=async buffer=>{
+  const pdfjs=await window.pdfjsReady;if(!pdfjs)throw new Error("leitor local indisponível");
+  const pdf=await pdfjs.getDocument({data:new Uint8Array(buffer)}).promise,tokens=[];
+  for(let pageNumber=1;pageNumber<=pdf.numPages;pageNumber++){const page=await pdf.getPage(pageNumber),content=await page.getTextContent();content.items.forEach(item=>{const value=String(item.str||"").trim();if(value)tokens.push(value);});}
+  const parsed=parseCnpjTokens(tokens);if(!parsed.cnpj||!parsed.razaoSocial)throw new Error("o PDF não contém texto cadastral reconhecível");return parsed;
+};
+
 /* ---------- regras de preenchimento ---------- */
 function fieldErrors(f){
   const e={};
@@ -456,6 +478,7 @@ function App(){
     if(importedBA&&currentBA&&norm(importedBA)!==norm(currentBA))warning=`O arquivo indica ${importedBA}, mas mantive ${currentBA}. Confirme o owner antes de enviar.`;
     else if(importedBA)put("nomeBa",importedBA);
     else if(parsed.nomeBaOriginal)warning=`O BA “${parsed.nomeBaOriginal}” não está cadastrado neste app e não foi aplicado.`;
+    if(parsed.situacaoCadastral&&norm(parsed.situacaoCadastral)!=="ativa")warning=[warning,`A situação cadastral informada no documento é ${parsed.situacaoCadastral}.`].filter(Boolean).join(" ");
     const count=Object.keys(filled).length;
     if(!count){setErr("Não encontrei campos compatíveis nesse registro. Você pode seguir com o preenchimento manual.");setImportRows([]);return;}
     setF(p=>({...p,...up}));setAuto(filled);setImportRows([]);setImportQuery("");setImportInfo({source:sourceLabel,fields:count,totalRows});setErr(warning);setStep(2);
@@ -463,39 +486,23 @@ function App(){
 
   const handlePdf=async file=>{
     if(file.size>8*1024*1024){setErr("O PDF precisa ter no máximo 8 MB.");return;}
-    if(!proxy&&!apiKey){setErr("Leitura automática do PDF indisponível: nenhuma chave configurada. Planilhas e CSV continuam funcionando automaticamente.");setStep(2);return;}
     setErr("");setFn(file.name);setLoadingLabel("Lendo cartão CNPJ…");setLoad(true);
-    const reader=new FileReader();
-    reader.onload=async e=>{
-      const b64=e.target.result.split(",")[1];
-      try{
-        let parsed;
+    try{
+      const buffer=await file.arrayBuffer();let parsed;
+      try{parsed=await readPdfLocally(buffer);applyParsed(parsed,"Cartão CNPJ · leitura automática",1);return;}
+      catch(localError){
+        if(!proxy&&!apiKey)throw new Error("o documento parece escaneado ou não segue o modelo do cartão CNPJ");
+        const b64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>resolve(e.target.result.split(",")[1]);reader.onerror=()=>reject(new Error("falha ao abrir o arquivo"));reader.readAsDataURL(file);});
         if(proxy){
-          const res=await fetch(PROXY,{method:"POST",headers:{"Content-Type":"application/json","x-team-pin":teamPin},body:JSON.stringify({pdf:b64})});
-          if(!res.ok)throw new Error("proxy "+res.status);
-          parsed=await res.json();
+          const res=await fetch(PROXY,{method:"POST",headers:{"Content-Type":"application/json","x-team-pin":teamPin},body:JSON.stringify({pdf:b64})});if(!res.ok)throw new Error("falha na leitura alternativa");parsed=await res.json();
         }else{
-          const res=await fetch("https://api.anthropic.com/v1/messages",{
-            method:"POST",
-            headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-            body:JSON.stringify({model:"claude-sonnet-4-5-20250929",max_tokens:700,
-              messages:[{role:"user",content:[
-                {type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},
-                {type:"text",text:`Cartão CNPJ. Responda só JSON, sem markdown:\n{"razaoSocial":"","cnpj":"XX.XXX.XXX/XXXX-XX","logradouro":"rua e número","bairro":"","cidade":"","estado":"sigla","cep":"XXXXX-XXX","ie":""}`}
-              ]}]})
-          });
-          const data=await res.json();
-          if(data.error)throw new Error(data.error.message||"api");
-          const txt=data.content?.find(b=>b.type==="text")?.text||"";
-          parsed=JSON.parse(txt.replace(/```json|```/g,"").trim());
+          const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5-20250929",max_tokens:700,messages:[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},{type:"text",text:`Cartão CNPJ. Responda só JSON, sem markdown:\n{"razaoSocial":"","nomeFantasia":"","cnpj":"XX.XXX.XXX/XXXX-XX","logradouro":"rua e número","bairro":"","cidade":"","estado":"sigla","cep":"XXXXX-XXX","ie":""}`}]}]})});
+          const data=await res.json();if(data.error)throw new Error(data.error.message||"falha na leitura alternativa");const txt=data.content?.find(b=>b.type==="text")?.text||"";parsed=JSON.parse(txt.replace(/```json|```/g,"").trim());
         }
-        applyParsed(parsed,"Cartão CNPJ",1);
-      }catch(ex){
-        setErr("Não consegui ler o PDF ("+ex.message+"). Preenche manual — o resto funciona normalmente.");
-        setStep(2);
-      }finally{setLoad(false);}
-    };
-    reader.readAsDataURL(file);
+        applyParsed(parsed,"Cartão CNPJ · leitura alternativa",1);
+      }
+    }catch(ex){setErr("Não consegui identificar os dados do cartão CNPJ: "+ex.message+". Confira se o PDF foi gerado pela Receita Federal.");setStep(2);}
+    finally{setLoad(false);}
   };
 
   const handleSheet=async file=>{
@@ -619,9 +626,7 @@ Solicitado por: ${f.nomeBa}`;
         <div className="modal-bg" onClick={()=>setShowCfg(false)}>
           <div className="modal" onClick={e=>e.stopPropagation()}>
             <div className="modal-title">Configuração</div>
-            <div className={`dstat ${proxy?"ok":"no"}`}>
-              {proxy?"● PDF + planilhas com preenchimento automático":"● Planilhas automáticas; PDF exige chave individual"}
-            </div>
+            <div className="dstat ok">● Cartão CNPJ e planilhas com preenchimento automático</div>
             <div className={`dstat ${shared?"ok":"no"}`}>{shared?"● Base compartilhada disponível":"● Modo local: processos ficam somente neste aparelho"}</div>
             <div className="fg">
               <div className="fd">
@@ -635,14 +640,14 @@ Solicitado por: ${f.nomeBa}`;
               {shared&&<><div className="fd"><label>PIN do time</label><input type="password" value={cfgTeamPin} onChange={e=>setCfgTeamPin(e.target.value)} placeholder="Acesso à base compartilhada"/></div><div className="fd"><label>PIN do gestor <span className="wtag">somente aprovadores</span></label><input type="password" value={cfgManagerPin} onChange={e=>setCfgManagerPin(e.target.value)} placeholder="Deixe vazio para perfil BA"/></div></>}
               {!proxy&&(
                 <div className="fd">
-                  <label>Chave API Anthropic <span className="wtag">só para leitura do PDF</span></label>
+                  <label>Leitura alternativa <span className="wtag">opcional para PDF escaneado</span></label>
                   <input value={cfgKey} onChange={e=>setCfgKey(e.target.value)} placeholder="sk-ant-..." style={{fontFamily:"monospace",fontSize:11}}/>
                 </div>
               )}
             </div>
             <div className="modal-desc">
               O nome e o e-mail de destino ficam salvos neste aparelho para não precisar redigitar.
-              {!proxy&&<> A chave é gerada em <a href="https://console.anthropic.com/settings/api-keys" target="_blank" rel="noreferrer">console.anthropic.com</a> e fica só no navegador.</>}
+              O cartão CNPJ padrão é lido automaticamente, sem chave. A leitura alternativa é usada apenas para documentos escaneados e fica salva somente neste navegador.
             </div>
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={()=>setShowCfg(false)}>Cancelar</button>
@@ -662,7 +667,7 @@ Solicitado por: ${f.nomeBa}`;
           <button className="hbtn" onClick={()=>{const opening=!showHist;setShowHist(opening);setShowEm(false);if(opening)setTimeout(loadShared,0);}}>
             {showHist?"← Voltar":`Processos${hist.length?" · "+hist.length:""}`}
           </button>
-          <button className={`hbtn ${proxy?"ok":apiKey?"ok":"warn"}`} onClick={()=>{setCfgKey(apiKey);setCfgDest(dest);setCfgBa(f.nomeBa||localStorage.getItem(K_BA)||"");setCfgTeamPin(teamPin);setCfgManagerPin(managerPin);setShowCfg(true);}}>
+          <button className="hbtn" onClick={()=>{setCfgKey(apiKey);setCfgDest(dest);setCfgBa(f.nomeBa||localStorage.getItem(K_BA)||"");setCfgTeamPin(teamPin);setCfgManagerPin(managerPin);setShowCfg(true);}}>
             ⚙ Config
           </button>
         </div>
@@ -715,7 +720,7 @@ Solicitado por: ${f.nomeBa}`;
             onClick={()=>fref.current?.click()}>
             <span className="uicon">＋</span>
             <div className="utitle">Importar dados da casa</div>
-            <div className="usub">Envie cartão CNPJ, BAM, B.A Management ou CSV.<br/><strong>O app reconhece as colunas, permite buscar a casa e preenche os campos disponíveis.</strong></div>
+            <div className="usub">Envie cartão CNPJ, BAM, B.A Management ou CSV.<br/><strong>O app preenche os dados disponíveis; o BA entra apenas para conferir e completar o que não existe no arquivo.</strong></div>
             <button className="btn btn-gold" onClick={e=>{e.stopPropagation();fref.current?.click();}}>Selecionar arquivo</button>
             <input ref={fref} type="file" accept=".pdf,.xlsx,.xls,.csv,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" style={{display:"none"}} onChange={e=>{handleFile(e.target.files[0]);e.target.value="";}}/>
           </div>
