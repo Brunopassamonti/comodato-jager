@@ -2,6 +2,8 @@
 
 Aplicativo interno para registrar, aprovar, contratar e acompanhar equipamentos em comodato.
 
+O fluxo On-Trade aceita somente **Tap Machine**. Shotpoint e Freezer não aparecem em novas solicitações.
+
 ## Importação inteligente
 
 Na primeira etapa, o BA pode consultar diretamente pelos 14 números do CNPJ ou enviar cartão CNPJ (`.pdf`), BAM/B.A Management (`.xls` ou `.xlsx`) ou arquivo `.csv`.
