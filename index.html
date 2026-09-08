@@ -3,17 +3,18 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
-<meta name="theme-color" content="#080808"/>
+<meta name="theme-color" content="#081b12"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
 <link rel="manifest" href="./manifest.json"/>
 <title>Gestão de Comodato · Jägermeister</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body,#root{height:100%;}
@@ -139,6 +140,36 @@ body{background:#080808;color:#F0EDE6;font-family:'Inter',sans-serif;-webkit-fon
   .toast{left:20px;right:20px;text-align:center;}
   .process-strip{grid-template-columns:repeat(3,1fr)}.pipeline{grid-template-columns:1fr 1fr}
 }
+
+/* ---------- identidade visual do portal On-Trade ---------- */
+:root{--ink:#07110c;--green-950:#081b12;--green-900:#0b281a;--green-800:#12452e;--green-500:#3a8d5e;--cream:#f3f0e7;--paper:#fbfaf6;--white:#fff;--orange:#f36c21;--orange-soft:#fff0e6;--line:#dcded8;--muted:#6c756f;--success:#278357;--warn:#bc7a16;--shadow:0 12px 40px rgba(8,27,18,.08);--display:'Barlow Condensed',Impact,sans-serif;}
+body{background:var(--cream);color:var(--ink);font-family:'Inter',sans-serif}.app{background:var(--cream)}
+::-webkit-scrollbar-track{background:var(--cream)}::-webkit-scrollbar-thumb{background:#b9c3bc}
+.header{min-height:82px;padding:0 36px;background:var(--green-950);border:0;color:var(--white);box-shadow:0 6px 24px rgba(8,27,18,.16)}
+.header-left{padding:18px 0}.logo{font-family:var(--display);font-style:normal;font-weight:800;font-size:25px;letter-spacing:.02em;text-transform:uppercase;color:var(--white)}
+.header-sep{height:28px;background:rgba(255,255,255,.18)}.header-sub{color:#b8c5bd;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em}
+.hbtn{color:#c7d1cb;border-color:rgba(255,255,255,.22);border-radius:8px;padding:9px 12px}.hbtn:hover,.hbtn.warn{color:var(--orange);border-color:var(--orange)}.hbtn.ok{color:#87d2a7;border-color:#3a7150}
+.steps{padding:0 32px;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 3px 12px rgba(8,27,18,.03)}
+.step-item{padding:15px 17px;color:#9aa49e}.step-item.active{color:var(--green-950);border-bottom-color:var(--orange)}.step-item.done{color:var(--green-500);border-bottom-color:transparent}.step-item.active .step-num{background:var(--orange);border-color:var(--orange);color:#fff}.step-item.done .step-num{background:#e8eee9;border-color:#b8c8bd}
+.main{max-width:980px;padding:34px 32px 64px}
+.upload-zone{background:var(--paper);border:2px dashed #aeb8b1;border-radius:14px;padding:54px 38px;box-shadow:0 4px 14px rgba(8,27,18,.03)}.upload-zone:hover,.upload-zone.drag-over{border-color:var(--orange);background:var(--orange-soft)}
+.uicon{width:52px;height:52px;display:grid;place-items:center;margin:0 auto 15px;border-radius:13px;background:var(--green-900);color:#fff;font-size:25px}.utitle,.modal-title{font-family:var(--display);font-style:normal;text-transform:uppercase;font-weight:800;color:var(--ink)}.utitle{font-size:29px}.usub{color:var(--muted);font-size:13px}.usub strong{color:var(--green-800)}.or-row{color:#9aa49e}
+.btn{border-radius:8px;font-family:'Inter',sans-serif;font-size:10px;font-weight:800;letter-spacing:.09em}.btn-gold{background:var(--orange);color:#fff}.btn-gold:hover{background:#d85818}.btn-out{color:var(--green-800);border-color:var(--green-800)}.btn-out:hover{background:#e8eee9;border-color:var(--green-500)}.btn-ghost{color:var(--muted);border-color:var(--line)}.btn-ghost:hover{color:var(--green-800);border-color:var(--green-500);background:#e8eee9}
+.spinner{border-color:#cfd6d1;border-top-color:var(--orange)}.spin-lbl{color:var(--muted)}
+.fbadge,.sum-card,.acard,.em-card,.hist-row,.metric,.checkrow{background:var(--paper);border-color:var(--line);border-radius:10px}.fbadge{color:var(--muted)}.fdot{background:var(--orange)}
+.sec{font-family:'Inter',sans-serif;font-size:10px;font-weight:800;color:var(--green-800);border-color:var(--line)}.sec span,.sec .opt{color:var(--muted)}
+.fd label{font-family:'Inter',sans-serif;font-size:9px;font-weight:800;color:var(--muted)}.fd input,.fd select,.fd textarea{background:var(--paper);border-color:var(--line);border-radius:8px;color:var(--ink)}.fd input:focus,.fd select:focus,.fd textarea:focus{border-color:var(--green-500);box-shadow:0 0 0 3px rgba(58,141,94,.10)}.fd input.af{border-color:#7bb092;background:#f2faf5;color:var(--green-800)}.fd input::placeholder{color:#a8afaa}.atag{color:var(--success)}.wtag{color:var(--orange)}
+.divider,.actions{border-color:var(--line)}.divider{background:var(--line)}
+.errbox{background:#fff5ee;border-color:#f4b58e;color:#9f4a1c;border-radius:9px}.infobox{background:var(--green-950);border-color:var(--green-950);color:#d2ddd6;border-radius:10px}.missing{color:var(--muted)}
+.ecard{background:var(--paper);border-color:var(--line);border-radius:10px}.ecard:hover{border-color:var(--green-500)}.ecard.sel{border-color:var(--orange);background:var(--orange-soft)}.ename{color:var(--ink);font-family:'Inter',sans-serif;font-weight:800}.edesc{color:var(--muted)}
+.request-hero{border:0;background:linear-gradient(110deg,var(--green-900),var(--green-800));border-radius:13px;box-shadow:var(--shadow)}.request-id{color:#fff}.request-help{color:#c5d1ca}.status-pill{color:#fff;border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.08)}.status-pill.green{color:#8fddb0;border-color:#3a7150;background:#0a2115}
+.sum-hdr,.em-hdr{background:#f0f3ef;border-color:var(--line)}.sum-lbl,.em-lbl{color:var(--orange)}.sk{color:var(--muted)}.sv{color:#56615a}.sv.hi,.hist-name,.atitle{color:var(--ink)}.adesc,.hist-meta,.next-action,.em-text{color:var(--muted)}
+.process-step{background:var(--paper);border-color:var(--line);border-radius:9px}.process-step.current{border-color:var(--orange);background:var(--orange-soft)}.process-step.done{border-color:#9ec5ad;background:#f2faf5}.process-step small{color:var(--muted)}.process-step.current small,.process-step.current .process-num{color:#b34d18}.process-step.done small{color:var(--success)}
+.pipeline .metric b{font-family:var(--display);color:var(--green-950)}.pipeline .metric span{color:var(--muted)}.note-card{background:var(--orange-soft);border-left-color:var(--orange);color:#765341;border-radius:0 9px 9px 0}.installation-card{background:#f2faf5;border-color:#9ec5ad;border-radius:12px}.checkrow strong{color:var(--ink)}.checkrow span{color:var(--muted)}.checkrow input{accent-color:var(--orange)}
+.modal-bg{background:rgba(8,27,18,.78);backdrop-filter:blur(4px)}.modal{background:var(--paper);border-color:var(--line);border-radius:14px;box-shadow:var(--shadow)}.modal-title{font-size:25px}.modal-desc{color:var(--muted)}.modal-desc a{color:var(--green-800)}.dstat.ok{color:var(--success);border-color:#9ec5ad;background:#f2faf5}.dstat.no{color:var(--warn);border-color:#e7c99d;background:#fff8ed}
+.toast{background:var(--green-950);border-color:var(--orange);color:#fff;border-radius:9px}
+.import-modal{width:650px}.import-search{width:100%;padding:0 13px;margin-bottom:12px;background:#fff;border:1px solid var(--line);border-radius:8px;color:var(--ink)}.import-list{display:grid;gap:8px;max-height:48vh;overflow:auto}.import-row{width:100%;display:grid;grid-template-columns:1fr auto;gap:12px;text-align:left;padding:13px 14px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);cursor:pointer}.import-row:hover{border-color:var(--green-500);background:#f2faf5}.import-row strong,.import-row small{display:block}.import-row small{margin-top:4px;color:var(--muted);line-height:1.4}.import-row-tag{align-self:center;padding:5px 7px;border-radius:5px;background:#e8eee9;color:var(--green-800);font-size:9px;font-weight:800;text-transform:uppercase}.import-count{margin:-6px 0 14px;color:var(--muted);font-size:11px}.import-success{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;margin-bottom:18px;border:1px solid #9ec5ad;border-radius:9px;background:#f2faf5;color:#315e43;font-size:11px;line-height:1.5}.import-success b{display:block;color:var(--green-800)}
+@media(max-width:600px){.header{min-height:72px;padding:0 14px;position:sticky;top:0;z-index:30}.logo{font-size:21px}.header-right{gap:5px}.hbtn{padding:8px;font-size:7px}.steps{padding:0;overflow-x:hidden}.step-item{flex:1;justify-content:center;padding:13px 5px;font-size:7.5px;letter-spacing:.07em}.main{padding:22px 14px 56px}.upload-zone{padding:38px 17px}.utitle{font-size:25px}.import-modal{padding:22px 16px}.import-row{grid-template-columns:1fr}.import-row-tag{justify-self:start}.process-strip{gap:5px}}
 </style>
 </head>
 <body>
@@ -180,6 +211,50 @@ const validCNPJ=v=>{const c=onlyD(v);if(c.length!==14||/^(\d)\1{13}$/.test(c))re
   return calc(12)===+c[12]&&calc(13)===+c[13];};
 const validEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v||"").trim());
 const fmtDate=iso=>{if(!iso)return"___";const[y,m,d]=iso.split("-");return`${parseInt(d)}   de   ${MONTHS[parseInt(m)-1]}   de   ${y}`;};
+
+/* ---------- importação de BAM, B.A Management e CSV ---------- */
+const norm=v=>String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+const IMPORT_ALIASES={
+  nomeFantasia:["venue","name","nome fantasia","cliente","customer","account","outlet","estabelecimento","casa"],
+  razaoSocial:["razao social","legal name","nome empresarial","company name"],
+  cnpj:["cnpj","tax id"],ie:["ie","inscricao estadual","state registration"],
+  endereco:["address","endereco","logradouro","street"],bairro:["neighborhood","bairro"],complemento:["complemento","complement","address 2"],
+  cidade:["cidade","city","municipio"],estado:["estado","state","uf"],cep:["cep","postal code","zip code"],
+  nomeBa:["b a","ba","brand ambassador","owner","responsavel"],prioridade:["priority","prioridade"],
+  poAtual:["efficiency","perfect outlet score","po atual"],dataRegistro:["registration date","data de registro","visit date","data da visita"],
+  singleTap:["single bottle tap machine","single tap machine","tap 1 garrafa"],dualTap:["dual tap machine","tap dupla"],tripleTap:["3 bottle tap machine","triple tap machine","tap 3 garrafas"],
+  equipTipo:["equipment type","tipo de equipamento","equipamento"],equipModelo:["equipment model","modelo do equipamento","modelo"],
+  equipSerie:["serial number","numero de serie","n de serie","serie"],equipPatrimonio:["patrimonio","asset number","numero de patrimonio"],equipVolt:["voltagem","voltage"],
+  localInstalacao:["local de instalacao","installation location"],volumeEstimado:["volume estimado","estimated volume"],pilar:["pilar","territorio","territory"]
+};
+const importVal=(row,aliases)=>{const entries=Object.entries(row||{}).map(([k,v])=>[norm(k),v]);for(const alias of aliases){const exact=entries.find(([k])=>k===alias);if(exact&&String(exact[1]??"").trim()!=="")return exact[1];}for(const alias of aliases){const close=entries.find(([k])=>k.endsWith(" "+alias)||k.startsWith(alias+" "));if(close&&String(close[1]??"").trim()!=="")return close[1];}return"";};
+const matchBA=v=>{const n=norm(v);if(!n)return"";return BA_OPTIONS.find(x=>norm(x)===n)||BA_OPTIONS.find(x=>norm(x).split(" ")[0]===n.split(" ")[0])||"";};
+const translatePriority=v=>({high:"Alta",alta:"Alta",medium:"Média",media:"Média",low:"Baixa",baixa:"Baixa"}[norm(v)]||"");
+const countValue=v=>{const n=Number(String(v??"").replace(",","."));return Number.isFinite(n)?n:(/^(yes|sim|true|x)$/i.test(String(v||"").trim())?1:0);};
+const mapImportRow=row=>{
+  const get=k=>importVal(row,IMPORT_ALIASES[k]);
+  const single=countValue(get("singleTap")),dual=countValue(get("dualTap")),triple=countValue(get("tripleTap"));
+  const rawEquip=norm(get("equipTipo"));let equipTipo="",equipModelo="";
+  if(triple>0){equipTipo="tap";equipModelo="Tap 3 garrafas · 4th Gen";}else if(dual>0){equipTipo="tap";equipModelo="Outro modelo";}else if(single>0){equipTipo="tap";equipModelo="Tap 1 garrafa";}else if(rawEquip.includes("tap")||rawEquip.includes("torneira")){equipTipo="tap";}else if(rawEquip.includes("shot")){equipTipo="shot";}else if(rawEquip.includes("freezer")){equipTipo="freezer";}
+  const endereco=String(get("endereco")||"").trim(),bairro=String(get("bairro")||"").trim();
+  return{nomeFantasia:String(get("nomeFantasia")||"").trim(),razaoSocial:String(get("razaoSocial")||"").trim(),cnpj:String(get("cnpj")||"").trim(),ie:String(get("ie")||"").trim(),
+    endereco:[endereco,bairro&&!norm(endereco).includes(norm(bairro))?bairro:""].filter(Boolean).join(", "),complemento:String(get("complemento")||"").trim(),cidade:String(get("cidade")||"").trim(),estado:String(get("estado")||"").trim(),cep:String(get("cep")||"").trim(),
+    nomeBa:matchBA(get("nomeBa")),nomeBaOriginal:String(get("nomeBa")||"").trim(),prioridade:translatePriority(get("prioridade")),poAtual:String(get("poAtual")||"").trim(),dataRegistro:get("dataRegistro"),
+    equipTipo,equipModelo:equipModelo||String(get("equipModelo")||"").trim(),equipSerie:String(get("equipSerie")||"").trim(),equipPatrimonio:String(get("equipPatrimonio")||"").trim(),equipVolt:String(get("equipVolt")||"").replace(/\D/g,"").slice(0,3),localInstalacao:String(get("localInstalacao")||"").trim(),volumeEstimado:String(get("volumeEstimado")||"").trim(),pilar:PILLARS.find(x=>norm(x)===norm(get("pilar")))||""};
+};
+const workbookRows=workbook=>{
+  const aliases=Object.values(IMPORT_ALIASES).flat(),found=[];
+  (workbook.SheetNames||[]).forEach(sheetName=>{
+    const sheet=workbook.Sheets[sheetName],matrix=XLSX.utils.sheet_to_json(sheet,{header:1,defval:"",raw:false});
+    let headerAt=-1,best=0;
+    matrix.slice(0,20).forEach((row,i)=>{const score=row.reduce((sum,v)=>sum+(aliases.includes(norm(v))?1:0),0);if(score>best){best=score;headerAt=i;}});
+    if(headerAt<0||best<1)return;
+    const headers=matrix[headerAt].map((v,i)=>String(v||`Coluna ${i+1}`).trim());
+    matrix.slice(headerAt+1).forEach((values,rowIndex)=>{const raw={};headers.forEach((h,i)=>{raw[h]=values[i]??"";});const mapped=mapImportRow(raw);if(mapped.nomeFantasia||onlyD(mapped.cnpj).length===14)found.push({...mapped,_sheet:sheetName,_row:rowIndex+headerAt+2});});
+  });
+  const unique=new Map();found.forEach(item=>{const key=onlyD(item.cnpj)||`${norm(item.nomeFantasia)}|${norm(item.nomeBaOriginal||item.nomeBa)}`;if(!key)return;const current=unique.get(key),a=Date.parse(item.dataRegistro)||0,b=Date.parse(current?.dataRegistro)||0;if(!current||a>=b)unique.set(key,item);});
+  return[...unique.values()].sort((a,b)=>a.nomeFantasia.localeCompare(b.nomeFantasia,"pt-BR"));
+};
 
 /* ---------- regras de preenchimento ---------- */
 function fieldErrors(f){
@@ -302,6 +377,10 @@ function App(){
   const[showCfg,setShowCfg]=useState(false);
   const[showHist,setShowHist]=useState(false);
   const[touched,setTouched]=useState({});
+  const[importRows,setImportRows]=useState([]);
+  const[importQuery,setImportQuery]=useState("");
+  const[importInfo,setImportInfo]=useState(null);
+  const[loadingLabel,setLoadingLabel]=useState("Lendo arquivo…");
   const[proxy,setProxy]=useState(null); // null = testando, true/false = resultado
   const[shared,setShared]=useState(null);
   const[apiKey,setApiKey]=useState(()=>localStorage.getItem(K_KEY)||"");
@@ -344,7 +423,7 @@ function App(){
   const toast_=m=>{setToast(m);setTimeout(()=>setToast(""),2600);};
   const upd=(k,v)=>setF(p=>({...p,[k]:v}));
   const blur=k=>setTouched(p=>({...p,[k]:true}));
-  const reset=()=>{setStep(1);setFn("");setAuto({});setErr("");setShowEm(false);setTouched({});setDraft(null);
+  const reset=()=>{setStep(1);setFn("");setAuto({});setErr("");setShowEm(false);setTouched({});setDraft(null);setImportRows([]);setImportQuery("");setImportInfo(null);
     localStorage.removeItem(K_DRAFT);setF(BLANK());};
 
   const sharedRecord=snap=>({requestId:snap.requestId,status:snap.status,nomeFantasia:snap.nomeFantasia,razaoSocial:snap.razaoSocial,cnpj:snap.cnpj,nomeBa:snap.nomeBa,prioridade:snap.prioridade,pilar:snap.pilar,justificativa:snap.justificativa,volumeEstimado:snap.volumeEstimado,poAtual:snap.poAtual,localInstalacao:snap.localInstalacao,equipTipo:snap.equipTipo,equipModelo:snap.equipModelo,equipSerie:snap.equipSerie,equipPatrimonio:snap.equipPatrimonio,equipVolt:snap.equipVolt,dataInstalacao:snap.dataInstalacao,fotoInstalacao:snap.fotoInstalacao,bamAtualizado:snap.bamAtualizado,observacao:snap.observacao,updatedAt:Date.now()});
@@ -362,24 +441,29 @@ function App(){
     setShowCfg(false);toast_("Configuração salva");
   };
 
-  const applyParsed=parsed=>{
-    const filled={},up={};
-    if(parsed.razaoSocial){up.razaoSocial=parsed.razaoSocial;filled.razaoSocial=true;}
-    if(parsed.cnpj){up.cnpj=mask(parsed.cnpj,"cnpj");filled.cnpj=true;}
-    if(parsed.logradouro||parsed.bairro){up.endereco=[parsed.logradouro,parsed.bairro].filter(Boolean).join(", ");filled.endereco=true;}
-    if(parsed.cidade){up.cidade=parsed.cidade;filled.cidade=true;}
-    if(parsed.estado){up.estado=String(parsed.estado).toUpperCase().slice(0,2);filled.estado=true;}
-    if(parsed.cep){up.cep=mask(parsed.cep,"cep");filled.cep=true;}
-    if(parsed.ie){up.ie=parsed.ie;filled.ie=true;}
-    setF(p=>({...p,...up}));setAuto(filled);setStep(2);
+  const applyParsed=(parsed,sourceLabel="arquivo",totalRows=1)=>{
+    const filled={},up={};let warning="";
+    const put=(k,v)=>{if(v!==undefined&&v!==null&&String(v).trim()!==""){up[k]=v;filled[k]=true;}};
+    put("nomeFantasia",parsed.nomeFantasia);put("razaoSocial",parsed.razaoSocial);
+    if(parsed.cnpj)put("cnpj",mask(parsed.cnpj,"cnpj"));if(parsed.ie)put("ie",parsed.ie);
+    const importedAddress=parsed.endereco||[parsed.logradouro,parsed.bairro].filter(Boolean).join(", ");put("endereco",importedAddress);put("complemento",parsed.complemento);
+    put("cidade",parsed.cidade);if(parsed.estado)put("estado",String(parsed.estado).toUpperCase().slice(0,2));if(parsed.cep)put("cep",mask(parsed.cep,"cep"));
+    put("prioridade",parsed.prioridade);put("poAtual",parsed.poAtual);put("volumeEstimado",parsed.volumeEstimado);put("localInstalacao",parsed.localInstalacao);put("pilar",parsed.pilar);
+    if(parsed.equipTipo){put("equipTipo",parsed.equipTipo);put("equipModelo",parsed.equipModelo||MODELS[parsed.equipTipo]?.[0]);}else put("equipModelo",parsed.equipModelo);
+    put("equipSerie",parsed.equipSerie);put("equipPatrimonio",parsed.equipPatrimonio);if(["110","220"].includes(parsed.equipVolt))put("equipVolt",parsed.equipVolt);
+    const importedBA=parsed.nomeBa||matchBA(parsed.nomeBaOriginal),currentBA=f.nomeBa||localStorage.getItem(K_BA)||"";
+    if(importedBA&&currentBA&&norm(importedBA)!==norm(currentBA))warning=`O arquivo indica ${importedBA}, mas mantive ${currentBA}. Confirme o owner antes de enviar.`;
+    else if(importedBA)put("nomeBa",importedBA);
+    else if(parsed.nomeBaOriginal)warning=`O BA “${parsed.nomeBaOriginal}” não está cadastrado neste app e não foi aplicado.`;
+    const count=Object.keys(filled).length;
+    if(!count){setErr("Não encontrei campos compatíveis nesse registro. Você pode seguir com o preenchimento manual.");setImportRows([]);return;}
+    setF(p=>({...p,...up}));setAuto(filled);setImportRows([]);setImportQuery("");setImportInfo({source:sourceLabel,fields:count,totalRows});setErr(warning);setStep(2);
   };
 
-  const handleFile=async file=>{
-    if(!file)return;
-    if(file.type!=="application/pdf"){setErr("O arquivo precisa ser um PDF.");return;}
+  const handlePdf=async file=>{
     if(file.size>8*1024*1024){setErr("O PDF precisa ter no máximo 8 MB.");return;}
-    if(!proxy&&!apiKey){setErr("Leitura automática indisponível: nenhuma chave configurada. Preenche manual que funciona igual.");setStep(2);return;}
-    setErr("");setFn(file.name);setLoad(true);
+    if(!proxy&&!apiKey){setErr("Leitura automática do PDF indisponível: nenhuma chave configurada. Planilhas e CSV continuam funcionando automaticamente.");setStep(2);return;}
+    setErr("");setFn(file.name);setLoadingLabel("Lendo cartão CNPJ…");setLoad(true);
     const reader=new FileReader();
     reader.onload=async e=>{
       const b64=e.target.result.split(",")[1];
@@ -404,13 +488,35 @@ function App(){
           const txt=data.content?.find(b=>b.type==="text")?.text||"";
           parsed=JSON.parse(txt.replace(/```json|```/g,"").trim());
         }
-        applyParsed(parsed);
+        applyParsed(parsed,"Cartão CNPJ",1);
       }catch(ex){
         setErr("Não consegui ler o PDF ("+ex.message+"). Preenche manual — o resto funciona normalmente.");
         setStep(2);
       }finally{setLoad(false);}
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleSheet=async file=>{
+    if(file.size>15*1024*1024){setErr("A planilha precisa ter no máximo 15 MB.");return;}
+    setErr("");setFn(file.name);setLoadingLabel("Organizando as casas…");setLoad(true);
+    try{
+      if(!window.XLSX)throw new Error("leitor de planilhas não carregou");
+      const buffer=await file.arrayBuffer(),workbook=XLSX.read(buffer,{type:"array",cellDates:true});
+      const rows=workbookRows(workbook);
+      if(!rows.length)throw new Error("não encontrei colunas de casa, CNPJ ou cliente");
+      if(rows.length===1)applyParsed(rows[0],file.name,1);
+      else{setImportRows(rows);setImportQuery("");setImportInfo({source:file.name,fields:0,totalRows:rows.length});}
+    }catch(ex){setErr(`Não consegui importar ${file.name}: ${ex.message}. Você pode seguir com o preenchimento manual.`);}
+    finally{setLoad(false);}
+  };
+
+  const handleFile=file=>{
+    if(!file)return;
+    const ext=(file.name.split(".").pop()||"").toLowerCase();
+    if(ext==="pdf"||file.type==="application/pdf")return handlePdf(file);
+    if(["xlsx","xls","csv"].includes(ext))return handleSheet(file);
+    setErr("Formato não reconhecido. Envie PDF, XLSX, XLS ou CSV.");
   };
 
   const EQlbl=EQUIP.find(e=>e.id===f.equipTipo)?.label||"";
@@ -486,15 +592,34 @@ Solicitado por: ${f.nomeBa}`;
       {touched[k]&&errs[k]&&<span className="ferr">{errs[k]}</span>}
     </div>
   );
+  const filteredImportRows=importRows.filter(row=>norm([row.nomeFantasia,row.razaoSocial,row.cnpj,row.nomeBaOriginal,row.cidade].join(" ")).includes(norm(importQuery))).slice(0,100);
 
   return(
     <div className="app">
+      {importRows.length>0&&(
+        <div className="modal-bg" onClick={()=>{setImportRows([]);setImportQuery("");}}>
+          <div className="modal import-modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-title">Escolha a casa</div>
+            <div className="modal-desc">Encontrei {importRows.length} casas em <strong>{fn}</strong>. Selecione uma para preencher a solicitação sem alterar o owner silenciosamente.</div>
+            <input className="import-search" type="search" value={importQuery} onChange={e=>setImportQuery(e.target.value)} placeholder="Buscar casa, CNPJ, cidade ou BA" autoFocus/>
+            <div className="import-count">{filteredImportRows.length} resultado{filteredImportRows.length===1?"":"s"}{filteredImportRows.length===100?" — refine a busca para ver mais":""}</div>
+            <div className="import-list">
+              {filteredImportRows.map((row,i)=><button type="button" className="import-row" key={`${row._sheet}-${row._row}-${i}`} onClick={()=>applyParsed(row,fn,importRows.length)}>
+                <span><strong>{row.nomeFantasia||row.razaoSocial||row.cnpj}</strong><small>{[row.nomeBaOriginal||row.nomeBa,row.cidade,row.cnpj].filter(Boolean).join(" · ")||"Dados cadastrais disponíveis"}</small></span>
+                <span className="import-row-tag">usar esta casa</span>
+              </button>)}
+              {!filteredImportRows.length&&<div className="empty">Nenhuma casa encontrada. Tente outro termo.</div>}
+            </div>
+            <div className="modal-actions"><button className="btn btn-ghost" onClick={()=>{setImportRows([]);setImportQuery("");}}>Cancelar</button></div>
+          </div>
+        </div>
+      )}
       {showCfg&&(
         <div className="modal-bg" onClick={()=>setShowCfg(false)}>
           <div className="modal" onClick={e=>e.stopPropagation()}>
             <div className="modal-title">Configuração</div>
             <div className={`dstat ${proxy?"ok":"no"}`}>
-              {proxy?"● Leitura de PDF pelo servidor — nenhuma chave necessária":"● Sem servidor: a leitura de PDF exige chave individual"}
+              {proxy?"● PDF + planilhas com preenchimento automático":"● Planilhas automáticas; PDF exige chave individual"}
             </div>
             <div className={`dstat ${shared?"ok":"no"}`}>{shared?"● Base compartilhada disponível":"● Modo local: processos ficam somente neste aparelho"}</div>
             <div className="fg">
@@ -530,7 +655,7 @@ Solicitado por: ${f.nomeBa}`;
         <div className="header-left">
           <span className="logo">Jägermeister</span>
           <div className="header-sep"/>
-          <span className="header-sub">Gestão de Comodato</span>
+          <span className="header-sub">On-Trade · Gestão de Comodato</span>
         </div>
         <div className="header-right">
           <button className="hbtn" onClick={()=>{const opening=!showHist;setShowHist(opening);setShowEm(false);if(opening)setTimeout(loadShared,0);}}>
@@ -544,7 +669,7 @@ Solicitado por: ${f.nomeBa}`;
 
       {!showHist&&(
         <div className="steps">
-          {[["01","Cartão CNPJ"],["02","Solicitação"],["03","Fluxo"]].map(([n,l],i)=>(
+          {[["01","Importar cliente"],["02","Solicitação"],["03","Fluxo"]].map(([n,l],i)=>(
             <div key={i} className={`step-item${step===i+1?" active":step>i+1?" done":""}`}
               onClick={()=>{if(step>i+1)setStep(i+1);}}>
               <div className="step-num">{step>i+1?"✓":n}</div>{l}
@@ -587,17 +712,17 @@ Solicitado por: ${f.nomeBa}`;
             onDragLeave={e=>e.currentTarget.classList.remove("drag-over")}
             onDrop={e=>{e.preventDefault();e.currentTarget.classList.remove("drag-over");handleFile(e.dataTransfer.files[0]);}}
             onClick={()=>fref.current?.click()}>
-            <span className="uicon">📋</span>
-            <div className="utitle">Cartão CNPJ do cliente</div>
-            <div className="usub">Arrasta o PDF aqui ou toca para selecionar.<br/><strong>Extrai automático: razão social · CNPJ · I.E. · endereço · cidade · UF · CEP.</strong></div>
-            <button className="btn btn-gold" onClick={e=>{e.stopPropagation();fref.current?.click();}}>Selecionar PDF</button>
-            <input ref={fref} type="file" accept="application/pdf" style={{display:"none"}} onChange={e=>handleFile(e.target.files[0])}/>
+            <span className="uicon">＋</span>
+            <div className="utitle">Importar dados da casa</div>
+            <div className="usub">Envie cartão CNPJ, BAM, B.A Management ou CSV.<br/><strong>O app reconhece as colunas, permite buscar a casa e preenche os campos disponíveis.</strong></div>
+            <button className="btn btn-gold" onClick={e=>{e.stopPropagation();fref.current?.click();}}>Selecionar arquivo</button>
+            <input ref={fref} type="file" accept=".pdf,.xlsx,.xls,.csv,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" style={{display:"none"}} onChange={e=>{handleFile(e.target.files[0]);e.target.value="";}}/>
           </div>
           <div className="or-row">— ou —</div>
-          <div style={{textAlign:"center"}}><button className="btn btn-ghost" onClick={()=>{setStep(2);setErr("");}}>Preencher sem PDF</button></div>
+          <div style={{textAlign:"center"}}><button className="btn btn-ghost" onClick={()=>{setStep(2);setErr("");}}>Preencher manualmente</button></div>
         </>)}
 
-        {!showHist&&step===1&&loading&&<div className="spinner-wrap"><div className="spinner"/><div className="spin-lbl">Lendo cartão CNPJ…</div></div>}
+        {!showHist&&step===1&&loading&&<div className="spinner-wrap"><div className="spinner"/><div className="spin-lbl">{loadingLabel}</div></div>}
 
         {!showHist&&step===2&&(<>
           <div className="restart-row">
@@ -605,12 +730,13 @@ Solicitado por: ${f.nomeBa}`;
             <button className="btn btn-ghost" style={{marginLeft:"auto"}} onClick={reset}>Recomeçar</button>
           </div>
           {err&&<div className="errbox">{err}</div>}
+          {importInfo&&<div className="import-success"><span>✓</span><span><b>{importInfo.fields} campos preenchidos automaticamente</b>Origem: {importInfo.source}{importInfo.totalRows>1?` · ${importInfo.totalRows} casas encontradas`:""}. Revise os dados jurídicos antes de enviar.</span></div>}
 
           <div className="request-hero"><div><div className="request-id">{f.requestId}</div><div className="request-help">Este número acompanha aprovação, contrato, instalação e BAM.</div></div><span className="status-pill">{f.status}</span></div>
           <div className="sec">Decisão comercial <span>por que este equipamento deve ir para esta casa</span></div>
           <div className="fg"><F k="nomeFantasia" label="Nome da casa" ph="Nome usado pelo time" wide/><div className="fr3"><div className="fd"><label>Prioridade</label><select value={f.prioridade} onChange={e=>upd("prioridade",e.target.value)}>{PRIORITIES.map(x=><option key={x}>{x}</option>)}</select></div><div className="fd" style={{gridColumn:"span 2"}}><label>Pilar / território</label><select value={f.pilar} onChange={e=>upd("pilar",e.target.value)}>{PILLARS.map(x=><option key={x}>{x}</option>)}</select></div></div><div className="fr3"><F k="volumeEstimado" label="Volume estimado / mês" ph="ex: 12 garrafas"/><F k="poAtual" label="Perfect Outlet atual" ph="ex: 3/6"/><F k="localInstalacao" label="Local de instalação" ph="ex: backbar"/></div><div className="fd"><label>Justificativa e objetivo</label><textarea value={f.justificativa} className={touched.justificativa&&errs.justificativa?"bad":""} onBlur={()=>blur("justificativa")} onChange={e=>upd("justificativa",e.target.value)} placeholder="Qual oportunidade será destravada? Inclua giro, visibilidade, ativação ou papel estratégico da casa."/>{touched.justificativa&&errs.justificativa&&<span className="ferr">{errs.justificativa}</span>}</div></div><div className="divider"/>
 
-          <div className="sec">Comodatária {Object.keys(auto).length>0&&<span>● extraído do PDF</span>}</div>
+          <div className="sec">Comodatária {Object.keys(auto).length>0&&<span>● preenchido pelo arquivo</span>}</div>
           <div className="fg">
             <F k="razaoSocial" label="Razão Social" ph="Nome jurídico exato" wide/>
             <div className="fr">
