@@ -181,7 +181,8 @@ body{background:var(--cream);color:var(--ink);font-family:'Inter',sans-serif}.ap
 .modal-bg{background:rgba(8,27,18,.78);backdrop-filter:blur(4px)}.modal{background:var(--paper);border-color:var(--line);border-radius:14px;box-shadow:var(--shadow)}.modal-title{font-size:25px}.modal-desc{color:var(--muted)}.modal-desc a{color:var(--green-800)}.dstat.ok{color:var(--success);border-color:#9ec5ad;background:#f2faf5}.dstat.no{color:var(--warn);border-color:#e7c99d;background:#fff8ed}
 .toast{background:var(--green-950);border-color:var(--orange);color:#fff;border-radius:9px}
 .import-modal{width:650px}.import-search{width:100%;padding:0 13px;margin-bottom:12px;background:#fff;border:1px solid var(--line);border-radius:8px;color:var(--ink)}.import-list{display:grid;gap:8px;max-height:48vh;overflow:auto}.import-row{width:100%;display:grid;grid-template-columns:1fr auto;gap:12px;text-align:left;padding:13px 14px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);cursor:pointer}.import-row:hover{border-color:var(--green-500);background:#f2faf5}.import-row strong,.import-row small{display:block}.import-row small{margin-top:4px;color:var(--muted);line-height:1.4}.import-row-tag{align-self:center;padding:5px 7px;border-radius:5px;background:#e8eee9;color:var(--green-800);font-size:9px;font-weight:800;text-transform:uppercase}.import-count{margin:-6px 0 14px;color:var(--muted);font-size:11px}.import-success{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;margin-bottom:18px;border:1px solid #9ec5ad;border-radius:9px;background:#f2faf5;color:#315e43;font-size:11px;line-height:1.5}.import-success b{display:block;color:var(--green-800)}
-@media(max-width:600px){.header{min-height:72px;padding:0 14px;position:sticky;top:0;z-index:30}.logo{font-size:21px}.header-right{gap:5px}.hbtn{padding:8px;font-size:7px}.steps{padding:0;overflow-x:hidden}.step-item{flex:1;justify-content:center;padding:13px 5px;font-size:7.5px;letter-spacing:.07em}.main{padding:22px 14px 56px}.upload-zone{padding:38px 17px}.utitle{font-size:25px}.import-modal{padding:22px 16px}.import-row{grid-template-columns:1fr}.import-row-tag{justify-self:start}.process-strip{gap:5px}}
+.cnpj-lookup{padding:21px;border:1px solid #9ec5ad;border-radius:14px;background:linear-gradient(120deg,#f2faf5,#fff);box-shadow:0 4px 14px rgba(8,27,18,.04)}.cnpj-lookup-head{display:flex;align-items:flex-start;gap:12px}.cnpj-lookup-icon{width:40px;height:40px;display:grid;place-items:center;flex:0 0 auto;border-radius:10px;background:var(--green-900);color:#fff;font-family:var(--display);font-size:14px;font-weight:800}.cnpj-lookup-title{font-family:var(--display);font-size:24px;font-weight:800;text-transform:uppercase;color:var(--ink)}.cnpj-lookup-copy{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.45}.cnpj-lookup-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;margin-top:16px}.cnpj-lookup-row input{width:100%;min-height:48px;padding:0 14px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-size:16px;outline:none}.cnpj-lookup-row input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(243,108,33,.12)}.cnpj-lookup-row .btn{min-height:48px;border-radius:8px}.cnpj-lookup-status{margin:9px 2px 0;color:var(--green-800);font-size:11px;font-weight:700}
+@media(max-width:600px){.header{min-height:72px;padding:0 14px;position:sticky;top:0;z-index:30}.logo{font-size:21px}.header-right{gap:5px}.hbtn{padding:8px;font-size:7px}.steps{padding:0;overflow-x:hidden}.step-item{flex:1;justify-content:center;padding:13px 5px;font-size:7.5px;letter-spacing:.07em}.main{padding:22px 14px 56px}.upload-zone{padding:38px 17px}.utitle{font-size:25px}.import-modal{padding:22px 16px}.import-row{grid-template-columns:1fr}.import-row-tag{justify-self:start}.process-strip{gap:5px}.cnpj-lookup{padding:17px 14px}.cnpj-lookup-row{grid-template-columns:1fr}.cnpj-lookup-row .btn{justify-content:center}.cnpj-lookup-title{font-size:22px}}
 </style>
 </head>
 <body>
@@ -414,6 +415,8 @@ function App(){
   const[importRows,setImportRows]=useState([]);
   const[importQuery,setImportQuery]=useState("");
   const[importInfo,setImportInfo]=useState(null);
+  const[cnpjLookup,setCnpjLookup]=useState("");
+  const[lookupLoading,setLookupLoading]=useState(false);
   const[loadingLabel,setLoadingLabel]=useState("Lendo arquivo…");
   const[proxy,setProxy]=useState(null); // null = testando, true/false = resultado
   const[shared,setShared]=useState(null);
@@ -458,7 +461,7 @@ function App(){
   const toast_=m=>{setToast(m);setTimeout(()=>setToast(""),2600);};
   const upd=(k,v)=>setF(p=>({...p,[k]:v}));
   const blur=k=>setTouched(p=>({...p,[k]:true}));
-  const reset=()=>{setStep(1);setFn("");setAuto({});setErr("");setShowEm(false);setTouched({});setDraft(null);setImportRows([]);setImportQuery("");setImportInfo(null);
+  const reset=()=>{setStep(1);setFn("");setAuto({});setErr("");setShowEm(false);setTouched({});setDraft(null);setImportRows([]);setImportQuery("");setImportInfo(null);setCnpjLookup("");setLookupLoading(false);
     localStorage.removeItem(K_DRAFT);setF(BLANK());};
 
   const sharedRecord=snap=>({requestId:snap.requestId,status:snap.status,nomeFantasia:snap.nomeFantasia,razaoSocial:snap.razaoSocial,cnpj:snap.cnpj,nomeBa:snap.nomeBa,prioridade:snap.prioridade,pilar:snap.pilar,justificativa:snap.justificativa,volumeEstimado:snap.volumeEstimado,poAtual:snap.poAtual,localInstalacao:snap.localInstalacao,equipTipo:snap.equipTipo,equipModelo:snap.equipModelo,equipSerie:snap.equipSerie,equipPatrimonio:snap.equipPatrimonio,equipVolt:snap.equipVolt,dataInstalacao:snap.dataInstalacao,fotoInstalacao:snap.fotoInstalacao,bamAtualizado:snap.bamAtualizado,observacao:snap.observacao,updatedAt:Date.now()});
@@ -517,6 +520,34 @@ function App(){
       }
     }catch(ex){if(job===pdfJob.current){setErr("Não consegui identificar os dados do cartão CNPJ: "+ex.message+". Confira se o PDF foi gerado pela Receita Federal.");setStep(2);}}
     finally{if(job===pdfJob.current)setLoad(false);}
+  };
+
+  const handleCnpjLookup=async()=>{
+    const digits=onlyD(cnpjLookup);
+    if(digits.length!==14||!validCNPJ(digits)){setErr("Digite um CNPJ válido com 14 números.");return;}
+    setErr("");setLookupLoading(true);
+    try{
+      const res=await withTimeout(fetch(`https://brasilapi.com.br/api/cnpj/v1/${digits}`,{headers:{Accept:"application/json"}}),12000,"a consulta demorou demais");
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok)throw new Error(data.message||"CNPJ não encontrado");
+      const stateRegistration=Array.isArray(data.inscricoes_estaduais)?data.inscricoes_estaduais.find(item=>item.ativo&&(!data.uf||item.uf===data.uf))?.inscricao_estadual:"";
+      const street=[data.descricao_tipo_de_logradouro||"",data.logradouro||""].filter(Boolean).join(" ").trim(),number=String(data.numero||"").trim();
+      const fullStreet=number&&!norm(street).endsWith(norm(number))?`${street} ${number}`:street;
+      applyParsed({
+        razaoSocial:data.razao_social,
+        nomeFantasia:data.nome_fantasia||data.razao_social,
+        cnpj:data.cnpj||digits,
+        ie:stateRegistration||"",
+        logradouro:fullStreet,
+        bairro:data.bairro,
+        complemento:data.complemento,
+        cidade:data.municipio,
+        estado:data.uf,
+        cep:data.cep,
+        situacaoCadastral:data.descricao_situacao_cadastral||data.situacao_cadastral
+      },"Consulta pública pelo CNPJ",1);
+    }catch(ex){setErr(`Não consegui consultar este CNPJ: ${ex.message}. Você ainda pode preencher manualmente.`);}
+    finally{setLookupLoading(false);}
   };
 
   const handleSheet=async file=>{
@@ -729,6 +760,18 @@ Solicitado por: ${f.nomeBa}`;
               </span>
             </div>
           )}
+          <div className="cnpj-lookup">
+            <div className="cnpj-lookup-head">
+              <span className="cnpj-lookup-icon">CNPJ</span>
+              <div><div className="cnpj-lookup-title">Consultar pelo número</div><div className="cnpj-lookup-copy">Cole o CNPJ da casa. O app busca os dados públicos sem precisar enviar o PDF.</div></div>
+            </div>
+            <div className="cnpj-lookup-row">
+              <input value={cnpjLookup} inputMode="numeric" autoComplete="off" aria-label="CNPJ para consulta" placeholder="00.000.000/0000-00" onChange={e=>setCnpjLookup(mask(e.target.value,"cnpj"))} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();handleCnpjLookup();}}}/>
+              <button className="btn btn-gold" disabled={lookupLoading} onClick={handleCnpjLookup}>{lookupLoading?"Buscando…":"Buscar dados"}</button>
+            </div>
+            {lookupLoading&&<div className="cnpj-lookup-status">Consultando o cadastro público…</div>}
+          </div>
+          <div className="or-row">— ou importe um arquivo —</div>
           <div className="upload-zone"
             onDragOver={e=>{e.preventDefault();e.currentTarget.classList.add("drag-over");}}
             onDragLeave={e=>e.currentTarget.classList.remove("drag-over")}
@@ -740,7 +783,7 @@ Solicitado por: ${f.nomeBa}`;
             <button className="btn btn-gold" onClick={e=>{e.stopPropagation();fref.current?.click();}}>Selecionar arquivo</button>
             <input ref={fref} type="file" accept=".pdf,.xlsx,.xls,.csv,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" style={{display:"none"}} onChange={e=>{handleFile(e.target.files[0]);e.target.value="";}}/>
           </div>
-          <div className="or-row">— ou —</div>
+          <div className="or-row">— ou preencha sem consulta —</div>
           <div style={{textAlign:"center"}}><button className="btn btn-ghost" onClick={()=>{setStep(2);setErr("");}}>Preencher manualmente</button></div>
         </>)}
 
