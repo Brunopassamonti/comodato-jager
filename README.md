@@ -1,6 +1,16 @@
-# Gestão de Comodato · Jägermeister — v3
+# Gestão de Comodato · Jägermeister — v4
 
 Aplicativo interno para registrar, aprovar, contratar e acompanhar equipamentos em comodato.
+
+## Importação inteligente
+
+Na primeira etapa, o BA pode enviar cartão CNPJ (`.pdf`), BAM/B.A Management (`.xls` ou `.xlsx`) ou arquivo `.csv`.
+
+- Planilhas e CSV são lidos localmente no navegador e não são enviados para um servidor.
+- Se houver várias casas, o app abre uma busca para escolher o cliente correto.
+- O app reconhece nome da casa, razão social, CNPJ, endereço, BA, prioridade, Perfect Outlet e dados de equipamento quando essas colunas estiverem disponíveis.
+- Se o owner do arquivo divergir do BA configurado no aparelho, o app mantém o BA atual e mostra um alerta para conferência.
+- Dados jurídicos ausentes no BAM continuam marcados para preenchimento manual e revisão antes do envio.
 
 ## Fluxo operacional
 
@@ -13,7 +23,7 @@ Aplicativo interno para registrar, aprovar, contratar e acompanhar equipamentos 
 
 Status disponíveis: `Rascunho`, `Solicitado`, `Em aprovação`, `Aprovado`, `Máquina reservada`, `Contrato enviado`, `Assinado`, `Instalação agendada`, `Instalado` e `Ativo`.
 
-## O que a v3 acrescenta
+## O que a v4 acrescenta
 
 - número único por solicitação;
 - prioridade e pilar territorial;
@@ -26,6 +36,9 @@ Status disponíveis: `Rascunho`, `Solicitado`, `Em aprovação`, `Aprovado`, `M�
 - histórico local preservado para proteger os dados pessoais do contrato;
 - limite de 8 MB no cartão CNPJ;
 - estrutura de deploy corrigida e ícone PWA incluído.
+- importação automática de BAM, B.A Management, CSV e cartão CNPJ;
+- busca da casa em arquivos com várias linhas e proteção contra troca silenciosa de owner;
+- identidade visual alinhada ao portal On-Trade.
 
 ## Privacidade
 
