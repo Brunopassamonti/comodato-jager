@@ -227,7 +227,7 @@ const IMPORT_ALIASES={
   equipSerie:["serial number","numero de serie","n de serie","serie"],equipPatrimonio:["patrimonio","asset number","numero de patrimonio"],equipVolt:["voltagem","voltage"],
   localInstalacao:["local de instalacao","installation location"],volumeEstimado:["volume estimado","estimated volume"],pilar:["pilar","territorio","territory"]
 };
-const importVal=(row,aliases)=>{const entries=Object.entries(row||{}).map(([k,v])=>[norm(k),v]);for(const alias of aliases){const exact=entries.find(([k])=>k===alias);if(exact&&String(exact[1]??"").trim()!=="")return exact[1];}for(const alias of aliases){const close=entries.find(([k])=>k.endsWith(" "+alias)||k.startsWith(alias+" "));if(close&&String(close[1]??"").trim()!=="")return close[1];}return"";};
+const importVal=(row,aliases)=>{const entries=Object.entries(row||{}).map(([k,v])=>[norm(k),v]);for(const alias of aliases){const exact=entries.find(([k])=>k===alias);if(exact&&String(exact[1]??"").trim()!=="")return exact[1];}for(const alias of aliases.filter(x=>x.length>=7)){const close=entries.find(([k])=>k.endsWith(" "+alias)||k.startsWith(alias+" "));if(close&&String(close[1]??"").trim()!=="")return close[1];}return"";};
 const matchBA=v=>{const n=norm(v);if(!n)return"";return BA_OPTIONS.find(x=>norm(x)===n)||BA_OPTIONS.find(x=>norm(x).split(" ")[0]===n.split(" ")[0])||"";};
 const translatePriority=v=>({high:"Alta",alta:"Alta",medium:"Média",media:"Média",low:"Baixa",baixa:"Baixa"}[norm(v)]||"");
 const countValue=v=>{const n=Number(String(v??"").replace(",","."));return Number.isFinite(n)?n:(/^(yes|sim|true|x)$/i.test(String(v||"").trim())?1:0);};
@@ -445,9 +445,9 @@ function App(){
     const filled={},up={};let warning="";
     const put=(k,v)=>{if(v!==undefined&&v!==null&&String(v).trim()!==""){up[k]=v;filled[k]=true;}};
     put("nomeFantasia",parsed.nomeFantasia);put("razaoSocial",parsed.razaoSocial);
-    if(parsed.cnpj)put("cnpj",mask(parsed.cnpj,"cnpj"));if(parsed.ie)put("ie",parsed.ie);
+    if(parsed.cnpj){const d=onlyD(parsed.cnpj);put("cnpj",mask(d.length===13?d.padStart(14,"0"):d,"cnpj"));}if(parsed.ie)put("ie",parsed.ie);
     const importedAddress=parsed.endereco||[parsed.logradouro,parsed.bairro].filter(Boolean).join(", ");put("endereco",importedAddress);put("complemento",parsed.complemento);
-    put("cidade",parsed.cidade);if(parsed.estado)put("estado",String(parsed.estado).toUpperCase().slice(0,2));if(parsed.cep)put("cep",mask(parsed.cep,"cep"));
+    put("cidade",parsed.cidade);if(parsed.estado)put("estado",String(parsed.estado).toUpperCase().slice(0,2));if(parsed.cep){const d=onlyD(parsed.cep);put("cep",mask(d.length===7?d.padStart(8,"0"):d,"cep"));}
     put("prioridade",parsed.prioridade);put("poAtual",parsed.poAtual);put("volumeEstimado",parsed.volumeEstimado);put("localInstalacao",parsed.localInstalacao);put("pilar",parsed.pilar);
     if(parsed.equipTipo){put("equipTipo",parsed.equipTipo);put("equipModelo",parsed.equipModelo||MODELS[parsed.equipTipo]?.[0]);}else put("equipModelo",parsed.equipModelo);
     put("equipSerie",parsed.equipSerie);put("equipPatrimonio",parsed.equipPatrimonio);if(["110","220"].includes(parsed.equipVolt))put("equipVolt",parsed.equipVolt);
