@@ -192,10 +192,10 @@ const {useState,useRef,useEffect} = React;
 
 /* ---------- constantes ---------- */
 const MONTHS=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-const EQUIP=[{id:"tap",label:"Tap Machine",icon:"🍺",desc:"Torneira / chopeira"},{id:"shot",label:"Shotpoint",icon:"❄️",desc:"Máquina de shots"},{id:"freezer",label:"Freezer",icon:"📦",desc:"Freezer armazenagem"}];
+const EQUIP=[{id:"tap",label:"Tap Machine",icon:"🍺",desc:"Equipamento On-Trade"}];
 const BA_OPTIONS=["Jerry Whilem","Julia Gutvilen","João Pedro Marques","Maria Clarentino","Mani Filardi","Marcelo Martins","Richard Cordeiro","Gustavo Viana"];
 const PILLARS=["Hotzone","Key Account / Castelo","Orla / Turismo","Cena / Tendência","Outro"],PRIORITIES=["Alta","Média","Baixa"];
-const MODELS={tap:["Tap 1 garrafa","Tap 3 garrafas · 4th Gen","Tap Retrô","Outro modelo"],shot:["Shotpoint padrão","Shotpoint compacto","Outro modelo"],freezer:["Freezer vertical","Freezer horizontal","Outro modelo"]};
+const MODELS={tap:["Tap 1 garrafa","Tap 3 garrafas · 4th Gen","Tap Retrô","Outro modelo"]};
 const STATUS_FLOW=["Rascunho","Solicitado","Em aprovação","Aprovado","Máquina reservada","Contrato enviado","Assinado","Instalação agendada","Instalado","Ativo"],STATUS_SHORT=["Solicitação","Aprovação","Reserva","Contrato","Instalação","Ativo"];
 const TODAY=()=>new Date().toISOString().split("T")[0];
 const PROXY="./.netlify/functions/cnpj";
@@ -203,7 +203,7 @@ const WORKFLOW="./.netlify/functions/workflow";
 const K_DRAFT="jgr_draft_v3",K_HIST="jgr_processos_v3",K_KEY="jgr_api_key",K_BA="jgr_ba_nome",K_DEST="jgr_dest_email",K_TEAM_PIN="jgr_team_pin",K_MANAGER_PIN="jgr_manager_pin";
 const makeId=()=>`COM-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
 const BLANK=()=>({razaoSocial:"",cnpj:"",ie:"",endereco:"",complemento:"",cidade:"",estado:"",cep:"",data:TODAY(),
-  requestId:makeId(),status:"Rascunho",nomeFantasia:"",prioridade:"Média",pilar:"Hotzone",justificativa:"",volumeEstimado:"",poAtual:"",localInstalacao:"",equipTipo:"shot",equipModelo:"Shotpoint padrão",equipSerie:"",equipPatrimonio:"",equipVolt:"220",
+  requestId:makeId(),status:"Rascunho",nomeFantasia:"",prioridade:"Média",pilar:"Hotzone",justificativa:"",volumeEstimado:"",poAtual:"",localInstalacao:"",equipTipo:"tap",equipModelo:"Tap 1 garrafa",equipSerie:"",equipPatrimonio:"",equipVolt:"220",
   nomeRep:"",cpfRep:"",emailRep:"",
   nomeRep2:"",cpfRep2:"",emailRep2:"",
   nomeTes:"",cpfTes:"",emailTes:"",
@@ -249,7 +249,7 @@ const mapImportRow=row=>{
   const get=k=>importVal(row,IMPORT_ALIASES[k]);
   const single=countValue(get("singleTap")),dual=countValue(get("dualTap")),triple=countValue(get("tripleTap"));
   const rawEquip=norm(get("equipTipo"));let equipTipo="",equipModelo="";
-  if(triple>0){equipTipo="tap";equipModelo="Tap 3 garrafas · 4th Gen";}else if(dual>0){equipTipo="tap";equipModelo="Outro modelo";}else if(single>0){equipTipo="tap";equipModelo="Tap 1 garrafa";}else if(rawEquip.includes("tap")||rawEquip.includes("torneira")){equipTipo="tap";}else if(rawEquip.includes("shot")){equipTipo="shot";}else if(rawEquip.includes("freezer")){equipTipo="freezer";}
+  if(triple>0){equipTipo="tap";equipModelo="Tap 3 garrafas · 4th Gen";}else if(dual>0){equipTipo="tap";equipModelo="Outro modelo";}else if(single>0){equipTipo="tap";equipModelo="Tap 1 garrafa";}else if(rawEquip.includes("tap")||rawEquip.includes("torneira")){equipTipo="tap";}
   const endereco=String(get("endereco")||"").trim(),bairro=String(get("bairro")||"").trim();
   return{nomeFantasia:String(get("nomeFantasia")||"").trim(),razaoSocial:String(get("razaoSocial")||"").trim(),cnpj:String(get("cnpj")||"").trim(),ie:String(get("ie")||"").trim(),
     endereco:[endereco,bairro&&!norm(endereco).includes(norm(bairro))?bairro:""].filter(Boolean).join(", "),complemento:String(get("complemento")||"").trim(),cidade:String(get("cidade")||"").trim(),estado:String(get("estado")||"").trim(),cep:String(get("cep")||"").trim(),
