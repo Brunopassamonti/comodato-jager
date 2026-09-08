@@ -1,4 +1,4 @@
-const V = "jgr-comodato-v4-2";
+const V = "jgr-comodato-v4-3";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", e => {
@@ -18,6 +18,7 @@ self.addEventListener("activate", e => {
 // Nunca intercepta a função serverless.
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+  if (new URL(e.request.url).origin !== self.location.origin) return;
   if (e.request.url.includes("/.netlify/functions/")) return;
   e.respondWith(
     fetch(e.request)
