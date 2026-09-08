@@ -4,8 +4,9 @@ Aplicativo interno para registrar, aprovar, contratar e acompanhar equipamentos 
 
 ## Importação inteligente
 
-Na primeira etapa, o BA pode enviar cartão CNPJ (`.pdf`), BAM/B.A Management (`.xls` ou `.xlsx`) ou arquivo `.csv`.
+Na primeira etapa, o BA pode consultar diretamente pelos 14 números do CNPJ ou enviar cartão CNPJ (`.pdf`), BAM/B.A Management (`.xls` ou `.xlsx`) ou arquivo `.csv`.
 
+- A consulta pelo número usa os dados cadastrais públicos da BrasilAPI e não envia arquivo algum.
 - Cartões CNPJ gerados pela Receita Federal são lidos diretamente no navegador, sem chave ou configuração.
 - Planilhas e CSV também são lidos localmente no navegador e não são enviados para um servidor.
 - Se houver várias casas, o app abre uma busca para escolher o cliente correto.
