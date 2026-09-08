@@ -221,6 +221,7 @@ const IMPORT_ALIASES={
   endereco:["address","endereco","logradouro","street"],bairro:["neighborhood","bairro"],complemento:["complemento","complement","address 2"],
   cidade:["cidade","city","municipio"],estado:["estado","state","uf"],cep:["cep","postal code","zip code"],
   nomeBa:["b a","ba","brand ambassador","owner","responsavel"],prioridade:["priority","prioridade"],
+  classificacao:["classification","classificacao"],statusBase:["status","account status","status da conta"],
   poAtual:["efficiency","perfect outlet score","po atual"],dataRegistro:["registration date","data de registro","visit date","data da visita"],
   singleTap:["single bottle tap machine","single tap machine","tap 1 garrafa"],dualTap:["dual tap machine","tap dupla"],tripleTap:["3 bottle tap machine","triple tap machine","tap 3 garrafas"],
   equipTipo:["equipment type","tipo de equipamento","equipamento"],equipModelo:["equipment model","modelo do equipamento","modelo"],
@@ -239,7 +240,7 @@ const mapImportRow=row=>{
   const endereco=String(get("endereco")||"").trim(),bairro=String(get("bairro")||"").trim();
   return{nomeFantasia:String(get("nomeFantasia")||"").trim(),razaoSocial:String(get("razaoSocial")||"").trim(),cnpj:String(get("cnpj")||"").trim(),ie:String(get("ie")||"").trim(),
     endereco:[endereco,bairro&&!norm(endereco).includes(norm(bairro))?bairro:""].filter(Boolean).join(", "),complemento:String(get("complemento")||"").trim(),cidade:String(get("cidade")||"").trim(),estado:String(get("estado")||"").trim(),cep:String(get("cep")||"").trim(),
-    nomeBa:matchBA(get("nomeBa")),nomeBaOriginal:String(get("nomeBa")||"").trim(),prioridade:translatePriority(get("prioridade")),poAtual:String(get("poAtual")||"").trim(),dataRegistro:get("dataRegistro"),
+    nomeBa:matchBA(get("nomeBa")),nomeBaOriginal:String(get("nomeBa")||"").trim(),prioridade:translatePriority(get("prioridade")),classificacao:String(get("classificacao")||"").trim(),statusBase:String(get("statusBase")||"").trim(),poAtual:String(get("poAtual")||"").trim(),dataRegistro:get("dataRegistro"),
     equipTipo,equipModelo:equipModelo||String(get("equipModelo")||"").trim(),equipSerie:String(get("equipSerie")||"").trim(),equipPatrimonio:String(get("equipPatrimonio")||"").trim(),equipVolt:String(get("equipVolt")||"").replace(/\D/g,"").slice(0,3),localInstalacao:String(get("localInstalacao")||"").trim(),volumeEstimado:String(get("volumeEstimado")||"").trim(),pilar:PILLARS.find(x=>norm(x)===norm(get("pilar")))||""};
 };
 const workbookRows=workbook=>{
@@ -250,7 +251,7 @@ const workbookRows=workbook=>{
     matrix.slice(0,20).forEach((row,i)=>{const score=row.reduce((sum,v)=>sum+(aliases.includes(norm(v))?1:0),0);if(score>best){best=score;headerAt=i;}});
     if(headerAt<0||best<1)return;
     const headers=matrix[headerAt].map((v,i)=>String(v||`Coluna ${i+1}`).trim());
-    matrix.slice(headerAt+1).forEach((values,rowIndex)=>{const raw={};headers.forEach((h,i)=>{raw[h]=values[i]??"";});const mapped=mapImportRow(raw);if(mapped.nomeFantasia||onlyD(mapped.cnpj).length===14)found.push({...mapped,_sheet:sheetName,_row:rowIndex+headerAt+2});});
+    matrix.slice(headerAt+1).forEach((values,rowIndex)=>{const raw={};headers.forEach((h,i)=>{raw[h]=values[i]??"";});const mapped=mapImportRow(raw),status=norm(mapped.statusBase),classification=norm(mapped.classificacao);if(["disabled","inactive","inativo","desativado"].includes(status)||classification&&classification!=="on trade")return;if(mapped.nomeFantasia||onlyD(mapped.cnpj).length===14)found.push({...mapped,_sheet:sheetName,_row:rowIndex+headerAt+2});});
   });
   const unique=new Map();found.forEach(item=>{const key=onlyD(item.cnpj)||`${norm(item.nomeFantasia)}|${norm(item.nomeBaOriginal||item.nomeBa)}`;if(!key)return;const current=unique.get(key),a=Date.parse(item.dataRegistro)||0,b=Date.parse(current?.dataRegistro)||0;if(!current||a>=b)unique.set(key,item);});
   return[...unique.values()].sort((a,b)=>a.nomeFantasia.localeCompare(b.nomeFantasia,"pt-BR"));
