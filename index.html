@@ -475,8 +475,11 @@ function App(){
   const pendingDocuments=useRef(null);
 
   const errs=fieldErrors(f);
-  const ok=Object.keys(errs).length===0;
-  const statusIndex=Math.max(0,STATUS_FLOW.indexOf(f.status)),contractReady=statusIndex>=STATUS_FLOW.indexOf("Aprovado")&&Boolean(f.equipSerie.trim()),installReady=Boolean(f.dataInstalacao&&f.fotoInstalacao.trim()&&f.bamAtualizado&&f.equipSerie.trim()),stageIndex=statusIndex<=1?0:statusIndex<=3?1:statusIndex===4?2:statusIndex<=6?3:statusIndex<=8?4:5;
+  const requestKeys=["razaoSocial","nomeFantasia","cnpj","endereco","cidade","estado","cep","data","justificativa","localInstalacao","nomeBa"];
+  const requestErrs=Object.fromEntries(Object.entries(errs).filter(([k])=>requestKeys.includes(k)));
+  const ok=Object.keys(requestErrs).length===0;
+  const contractOk=Object.keys(errs).length===0;
+  const statusIndex=Math.max(0,STATUS_FLOW.indexOf(f.status)),contractUnlocked=statusIndex>=STATUS_FLOW.indexOf("Aprovado")&&Boolean(f.equipSerie.trim()),contractReady=contractUnlocked&&contractOk,installReady=Boolean(f.dataInstalacao&&f.fotoInstalacao.trim()&&f.bamAtualizado&&f.equipSerie.trim()),stageIndex=statusIndex<=1?0:statusIndex<=3?1:statusIndex===4?2:statusIndex<=6?3:statusIndex<=8?4:5;
   const nextAction=s=>({"Rascunho":"Registrar a solicitação","Solicitado":"Enviar para aprovação","Em aprovação":"Gestor: aprovar ou devolver","Aprovado":"Reservar máquina e informar série/patrimônio","Máquina reservada":"Gerar contrato e enviar para assinatura","Contrato enviado":"Acompanhar assinaturas","Assinado":"Agendar instalação","Instalação agendada":"Instalar, anexar foto e atualizar o BAM","Instalado":"Confirmar equipamento ativo","Ativo":"Acompanhar execução, giro e manutenção"}[s]||"Revisar processo");
 
   /* detecta se existe proxy publicado */
@@ -510,7 +513,8 @@ function App(){
   const loadShared=async()=>{if(!shared||!teamPin)return;try{const res=await fetch(WORKFLOW,{headers:{"x-team-pin":teamPin}});if(!res.ok)throw new Error();const data=await res.json();setHist(prev=>{const local=new Map(prev.map(x=>[x.requestId,x]));const merged=(data.records||[]).map(r=>{const l=local.get(r.requestId);if(l){local.delete(r.requestId);return{...l,...r,snap:{...l.snap,...r}}}return{...r,ts:r.updatedAt||Date.now(),equip:EQUIP.find(e=>e.id===r.equipTipo)?.label||"",snap:null}});return[...merged,...local.values()].sort((a,b)=>(b.updatedAt||b.ts)-(a.updatedAt||a.ts))})}catch{setErr("Não consegui sincronizar a base do time. Os dados deste aparelho continuam disponíveis.")}};
   const saveProcess=(snap,message="Processo atualizado",sync=true)=>{const now=Date.now(),entry={ts:now,updatedAt:now,requestId:snap.requestId,status:snap.status,razaoSocial:snap.razaoSocial,nomeFantasia:snap.nomeFantasia,cnpj:snap.cnpj,equip:EQUIP.find(e=>e.id===snap.equipTipo)?.label||"",serie:snap.equipSerie,data:snap.data,nomeBa:snap.nomeBa,snap},found=hist.find(h=>h.requestId===snap.requestId),next=found?[entry,...hist.filter(h=>h.requestId!==snap.requestId)]:[entry,...hist];setHist(next.slice(0,100));try{localStorage.setItem(K_HIST,JSON.stringify(next.filter(x=>x.snap).slice(0,100)))}catch{}if(sync&&shared&&teamPin)postShared(snap).catch(()=>setErr("O processo ficou salvo neste aparelho, mas não sincronizou com a base do time."));toast_(message)};
   const setProcessStatus=async(status,message)=>{if(shared&&status==="Aprovado"&&!managerPin){setErr("A aprovação exige o PIN do gestor em Configuração.");return}const snap={...f,status};if(shared&&teamPin){try{await postShared(snap)}catch(e){setErr(e.message||"Não foi possível atualizar o processo.");return}}setErr("");setF(snap);saveProcess(snap,message||`Status: ${status}`,false);localStorage.removeItem(K_DRAFT)};
-  const registerRequest=()=>{if(!ok){setTouched(Object.fromEntries(Object.keys(errs).map(k=>[k,true])));setErr("Revise os campos obrigatórios antes de registrar.");return}setErr("");setProcessStatus("Solicitado",`Solicitação ${f.requestId} registrada`)};
+  const reviewRequest=()=>{if(!ok){setTouched(p=>({...p,...Object.fromEntries(Object.keys(requestErrs).map(k=>[k,true]))}));setErr("Ainda faltam dados da solicitação. Complete os campos destacados abaixo.");return}setErr("");setStep(3);};
+  const registerRequest=()=>{if(!ok){setTouched(p=>({...p,...Object.fromEntries(Object.keys(requestErrs).map(k=>[k,true]))}));setErr("Revise os dados obrigatórios da solicitação antes de registrar.");return}setErr("");setProcessStatus("Solicitado",`Solicitação ${f.requestId} registrada`)};
 
   const saveCfg=()=>{
     localStorage.setItem(K_KEY,cfgKey);setApiKey(cfgKey);
@@ -672,7 +676,8 @@ Solicitado por: ${f.nomeBa}`;
   const openMail=()=>{window.location.href=`mailto:${encodeURIComponent(dest)}?subject=${encodeURIComponent(subject())}&body=${encodeURIComponent(emailTxt())}`;};
 
   const genDocx=async()=>{
-    if(!contractReady){setErr("O contrato só pode ser gerado após a aprovação e com o número de série informado.");return;}
+    if(!contractUnlocked){setErr("O contrato só pode ser gerado após a aprovação e com o número de série informado.");return;}
+    if(!contractOk){setTouched(p=>({...p,...Object.fromEntries(Object.keys(errs).map(k=>[k,true]))}));setErr(`Antes de gerar o contrato, complete os dados de assinatura: ${Object.keys(errs).map(k=>LABELS[k]).filter(Boolean).join(" · ")}.`);setStep(2);return;}
     setDL(true);setErr("");
     try{
       const zip=new JSZip();
@@ -904,7 +909,7 @@ Solicitado por: ${f.nomeBa}`;
           </div>
 
           <div className="divider"/>
-          <div className="sec">Representante Legal <span>nome e CPF podem vir dos documentos · e-mail é conferido pelo BA</span></div>
+          <div className="sec">Representante Legal <span>necessário para o contrato · não bloqueia o envio para aprovação</span></div>
           <div className="fg">
             <F k="nomeRep" label="Nome Completo" ph="Nome completo" wide/>
             <div className="fr">
@@ -923,7 +928,7 @@ Solicitado por: ${f.nomeBa}`;
           </div>
 
           <div className="divider"/>
-          <div className="sec">Testemunha</div>
+          <div className="sec">Testemunha <span>necessária para o contrato · pode ser preenchida depois da aprovação</span></div>
           <div className="fg">
             <F k="nomeTes" label="Nome Completo" ph="Nome completo" wide/>
             <div className="fr">
@@ -939,12 +944,12 @@ Solicitado por: ${f.nomeBa}`;
           <div className="actions">
             {!ok&&(
               <div className="missing">
-                Falta preencher: {Object.keys(errs).map(k=>LABELS[k]).filter(Boolean).map((l,i,a)=>(
+                Para enviar à aprovação falta: {Object.keys(requestErrs).map(k=>LABELS[k]).filter(Boolean).map((l,i,a)=>(
                   <React.Fragment key={l}><b>{l}</b>{i<a.length-1?" · ":""}</React.Fragment>))}
               </div>
             )}
             <button className="btn btn-ghost" onClick={()=>setStep(1)}>Voltar</button>
-            <button className="btn btn-gold" disabled={!ok} onClick={()=>setStep(3)}>Revisar solicitação →</button>
+            <button className="btn btn-gold" onClick={reviewRequest}>Revisar solicitação →</button>
           </div>
         </>)}
 
@@ -979,7 +984,7 @@ Solicitado por: ${f.nomeBa}`;
             <div className="acard">
               <div className="aicon">📄</div>
               <div className="atitle">Contrato de Comodato</div>
-              <div className="adesc">Disponível após aprovação e reserva da série. Mantém o texto jurídico e adiciona modelo e patrimônio à identificação do bem.</div><button className="btn btn-gold" onClick={genDocx} disabled={dlLoad||!contractReady}>{dlLoad?"Gerando…":contractReady?"⬇ Gerar .docx":"Aguardando aprovação / série"}</button>
+              <div className="adesc">Disponível após aprovação e reserva da série. Os dados de representante e testemunha são exigidos somente na geração do contrato.</div><button className="btn btn-gold" onClick={genDocx} disabled={dlLoad||!contractUnlocked}>{dlLoad?"Gerando…":!contractUnlocked?"Aguardando aprovação / série":contractOk?"⬇ Gerar .docx":"Completar dados de assinatura"}</button>
             </div>
             <div className="acard">
               <div className="aicon">✉️</div>
