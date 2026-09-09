@@ -1,6 +1,6 @@
 # Gestão de Comodato · Jägermeister — v4
 
-Aplicativo interno para registrar, aprovar, contratar e acompanhar equipamentos em comodato.
+Aplicativo interno para preparar pedidos de comodato, gerar o contrato e montar o texto do e-mail para envio pelo BA.
 
 O fluxo On-Trade aceita somente **Tap Machine**. Shotpoint e Freezer não aparecem em novas solicitações.
 
@@ -23,52 +23,25 @@ Na primeira etapa, o BA pode consultar diretamente pelos 14 números do CNPJ ou 
 
 ## Fluxo operacional
 
-1. **Solicitação** — BA informa casa, prioridade, pilar, objetivo, oportunidade, dados jurídicos e modelo desejado.
-2. **Aprovação** — gestor valida a oportunidade antes da reserva e do contrato.
-3. **Reserva** — série e patrimônio identificam o equipamento destinado à casa.
-4. **Contrato** — o `.docx` só é liberado depois da aprovação e com a série preenchida.
-5. **Instalação** — data e foto comprovam a entrega física.
-6. **Ativação** — o processo só termina quando o BAM estiver atualizado.
+O app automatiza **somente a preparação do pedido de comodato**. Ele não substitui o fluxo interno de aprovação da Interfood/Jägermeister.
 
-Status disponíveis: `Rascunho`, `Solicitado`, `Em aprovação`, `Aprovado`, `Máquina reservada`, `Contrato enviado`, `Assinado`, `Instalação agendada`, `Instalado` e `Ativo`.
+1. **Importar cliente** — consultar CNPJ ou importar documentos/BAM.
+2. **Dados do pedido** — completar e conferir casa, equipamento, representantes, testemunha e BA.
+3. **Gerar** — revisar os dados, baixar o contrato em `.docx` e copiar o texto do e-mail.
 
-## O que a v4 acrescenta
+Depois disso, o BA envia o e-mail e o anexo pelo canal corporativo. Aprovação, assinatura, instalação, atualização de BAM e demais etapas seguem internamente fora do app.
 
-- número único por solicitação;
-- prioridade e pilar territorial;
-- justificativa comercial, volume estimado e Perfect Outlet atual;
-- modelo, série, patrimônio e local de instalação;
-- visão de processos com próxima ação;
-- confirmação de instalação com foto e BAM atualizado;
-- base compartilhada opcional pelo Netlify Blobs;
-- PIN do time e PIN separado para aprovação do gestor;
-- histórico local preservado para proteger os dados pessoais do contrato;
-- limite de 8 MB por PDF;
-- envio de até 8 documentos por vez, com combinação automática dos campos da empresa e dos representantes;
-- estrutura de deploy corrigida e ícone PWA incluído.
-- importação automática de BAM, B.A Management, CSV e cartão CNPJ;
-- busca da casa em arquivos com várias linhas e proteção contra troca silenciosa de owner;
-- identidade visual alinhada ao portal On-Trade.
+O número de solicitação continua sendo gerado apenas para identificar o pedido e facilitar referência no e-mail.
 
 ## Privacidade
 
 A base compartilhada guarda somente os dados operacionais do processo. CPF, e-mail e dados das pessoas que assinam continuam apenas no aparelho que criou a solicitação. Isso permite ao gestor acompanhar o fluxo sem transformar o painel operacional em uma base de dados pessoais.
 
-## Publicação no Netlify
+## Publicação
 
-Conecte o repositório ao Netlify. O `netlify.toml` publica a raiz e carrega as funções em `netlify/functions`.
+O app funciona como site estático no GitHub Pages. A geração do contrato, o rascunho e o texto do e-mail acontecem no navegador. Não há painel de gerente, aprovação ou acompanhamento do processo interno dentro do app.
 
-Configure em **Project configuration → Environment variables**:
-
-- `ANTHROPIC_API_KEY`: leitura automática do cartão CNPJ;
-- `TEAM_ACCESS_PIN`: PIN distribuído aos BAs;
-- `MANAGER_PIN`: PIN restrito aos aprovadores.
-
-As variáveis não devem ser escritas no `netlify.toml` nem enviadas ao GitHub.
-
-## GitHub Pages
-
-O app também abre como site estático. Nesse modo, geração de contrato, rascunho e processos funcionam localmente, mas não há sincronização entre aparelhos. A leitura de PDF usa uma chave individual opcional ou preenchimento manual.
+As funções Netlify existentes no repositório são legadas da tentativa de transformar o gerador em workflow e não são necessárias para o uso principal no GitHub Pages.
 
 ## Estrutura
 
