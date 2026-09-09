@@ -26,8 +26,8 @@ Na primeira etapa, o BA pode consultar diretamente pelos 14 números do CNPJ ou 
 O app automatiza **somente a preparação do pedido de comodato**. Ele não substitui o fluxo interno de aprovação da Interfood/Jägermeister.
 
 1. **Importar cliente** — consultar CNPJ ou importar documentos/BAM.
-2. **Dados do pedido** — completar e conferir casa, equipamento, representantes, testemunha e BA.
-3. **Gerar** — revisar os dados, baixar o contrato em `.docx` e copiar o texto do e-mail.
+2. **Dados do pedido** — completar e conferir casa, inscrição estadual, quantidade de máquinas, numeração de cada equipamento, representantes, testemunha e BA. A justificativa comercial é opcional e todas as Tap Machines são tratadas como 220V.
+3. **Gerar** — revisar os dados, baixar o contrato em `.docx`, copiar o texto do e-mail e lembrar do contrato social/última alteração consolidada como anexo obrigatório. Para SP e RJ, o app direciona para a Junta Comercial correspondente.
 
 Depois disso, o BA envia o e-mail e o anexo pelo canal corporativo. Aprovação, assinatura, instalação, atualização de BAM e demais etapas seguem internamente fora do app.
 
