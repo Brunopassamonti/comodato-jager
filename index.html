@@ -681,7 +681,6 @@ Solicitado por: ${f.nomeBa}`;
       a.href=url;a.download=`Comodato_${f.razaoSocial.replace(/[^\wÀ-ÿ]+/g,"_")}_${f.equipSerie}.docx`;
       document.body.appendChild(a);a.click();document.body.removeChild(a);
       setTimeout(()=>URL.revokeObjectURL(url),1500);
-      saveProcess(f,"Contrato gerado e processo salvo");
       toast_("Contrato gerado");
     }catch(e){setErr("Erro ao gerar o .docx: "+e.message);}
     finally{setDL(false);}
