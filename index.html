@@ -723,7 +723,7 @@ Solicitado por: ${f.nomeBa}`;
           <div className="modal" onClick={e=>e.stopPropagation()}>
             <div className="modal-title">Configuração</div>
             <div className="dstat ok">● Cartão CNPJ e planilhas com preenchimento automático</div>
-            <div className={`dstat ${shared?"ok":"no"}`}>{shared?"● Base compartilhada disponível":"● Modo local: processos ficam somente neste aparelho"}</div>
+            <div className="dstat ok">● Gerador local: o app não aprova nem acompanha o processo interno</div>
             <div className="fg">
               <div className="fd">
                 <label>Seu nome (Brand Ambassador)</label>
@@ -733,7 +733,7 @@ Solicitado por: ${f.nomeBa}`;
                 <label>E-mail de destino do comodato</label>
                 <input value={cfgDest} onChange={e=>setCfgDest(e.target.value)} placeholder="responsavel@interfood.com.br"/>
               </div>
-              {shared&&<><div className="fd"><label>PIN do time</label><input type="password" value={cfgTeamPin} onChange={e=>setCfgTeamPin(e.target.value)} placeholder="Acesso à base compartilhada"/></div><div className="fd"><label>PIN do gestor <span className="wtag">somente aprovadores</span></label><input type="password" value={cfgManagerPin} onChange={e=>setCfgManagerPin(e.target.value)} placeholder="Deixe vazio para perfil BA"/></div></>}
+
               {!proxy&&(
                 <div className="fd">
                   <label>Leitura alternativa <span className="wtag">opcional para PDF escaneado</span></label>
@@ -742,8 +742,9 @@ Solicitado por: ${f.nomeBa}`;
               )}
             </div>
             <div className="modal-desc">
-              O nome e o e-mail de destino ficam salvos neste aparelho para não precisar redigitar.
-              O cartão CNPJ padrão é lido automaticamente, sem chave. A leitura alternativa é usada apenas para cartão CNPJ escaneado e fica salva somente neste navegador. Documentos pessoais são sempre processados localmente.
+              O nome do BA e o e-mail de destino ficam salvos neste aparelho para não precisar redigitar.
+              O app somente prepara o pedido: gera o contrato e o texto do e-mail. Aprovação, envio para Clicksign, instalação e demais etapas seguem pelo processo interno da empresa.
+              O cartão CNPJ padrão é lido automaticamente, sem chave. Documentos pessoais são sempre processados localmente.
             </div>
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={()=>setShowCfg(false)}>Cancelar</button>
