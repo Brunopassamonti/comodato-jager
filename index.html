@@ -191,7 +191,7 @@ body{background:var(--cream);color:var(--ink);font-family:'Inter',sans-serif}.ap
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const {useState,useRef,useEffect} = React;
+const {useState,useRef,useEffect,useMemo} = React;
 
 /* ---------- constantes ---------- */
 const MONTHS=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
@@ -473,6 +473,7 @@ function App(){
   const fref=useRef(null);
   const pdfJob=useRef(0);
   const pendingDocuments=useRef(null);
+  const fieldCtx=useRef(null);
 
   const errs=fieldErrors(f);
   const ok=Object.keys(errs).length===0;
@@ -686,16 +687,21 @@ Solicitado por: ${f.nomeBa}`;
     finally{setDL(false);}
   };
 
-  const F=({k,label,ph,type,mk,wide,note})=>(
-    <div className="fd" style={wide?{gridColumn:"1/-1"}:undefined}>
-      <label>{label} {auto[k]&&<span className="atag">auto</span>} {note&&<span className="wtag">{note}</span>}</label>
-      <input type={type||"text"} value={f[k]} placeholder={ph}
-        className={`${auto[k]?"af ":""}${touched[k]&&errs[k]?"bad":""}`}
-        onBlur={()=>blur(k)}
-        onChange={e=>upd(k,mk?mask(e.target.value,mk):e.target.value)}/>
-      {touched[k]&&errs[k]&&<span className="ferr">{errs[k]}</span>}
-    </div>
-  );
+  fieldCtx.current={f,auto,touched,errs,blur,upd};
+  const F=useMemo(()=>function StableField({k,label,ph,type,mk,wide,note}){
+    const current=fieldCtx.current;
+    const value=current.f[k]??"";
+    return(
+      <div className="fd" style={wide?{gridColumn:"1/-1"}:undefined}>
+        <label>{label} {current.auto[k]&&<span className="atag">auto</span>} {note&&<span className="wtag">{note}</span>}</label>
+        <input type={type||"text"} value={value} placeholder={ph}
+          className={`${current.auto[k]?"af ":""}${current.touched[k]&&current.errs[k]?"bad":""}`}
+          onBlur={()=>current.blur(k)}
+          onChange={e=>current.upd(k,mk?mask(e.target.value,mk):e.target.value)}/>
+        {current.touched[k]&&current.errs[k]&&<span className="ferr">{current.errs[k]}</span>}
+      </div>
+    );
+  },[]);
   const filteredImportRows=importRows.filter(row=>norm([row.nomeFantasia,row.razaoSocial,row.cnpj,row.nomeBaOriginal,row.cidade].join(" ")).includes(norm(importQuery))).slice(0,100);
 
   return(
